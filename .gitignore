@@ -1,0 +1,47 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules
+*/node_modules
+.pnp
+.pnp.js
+
+# Local env files
+.env
+.env.*
+*/.env
+*/.env.*
+!.env.example
+!.env.*.example
+!*/.env.example
+!*/.env.*.example
+
+# Testing
+coverage
+
+# Turbo
+.turbo
+*/.turbo
+
+# Build Outputs
+build
+*/build
+dist
+*/dist
+
+# Debug
+npm-debug.log*
+pnpm-debug.log*
+
+# Misc
+.DS_Store
+*.pem
+
+coverage.json
+
+# Superpowers specs
+*/superpowers/specs
+
+# Worktrees
+.claude/worktrees
+.dev/worktrees

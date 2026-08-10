@@ -73,7 +73,7 @@ Admin/editor uploads BOW PDF
 
 ### Phase 1 — Prototype (current focus)
 
-- [ ] Set up Hono.js project skeleton (Node runtime)
+- [✅] Set up Hono.js project skeleton (Node runtime)
 - [ ] NVIDIA NIM API key + test call (confirm model choice: LLM for reasoning, vision model for extraction fallback, image model for visuals)
 - [ ] PDF extraction route: parse a sample BOW PDF, output structured objectives (JSON)
 - [ ] Lesson plan generation route: prompt design + structured JSON output from NIM LLM

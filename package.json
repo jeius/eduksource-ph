@@ -1,0 +1,32 @@
+{
+  "name": "@eduksource",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Julius Pahama <https://www.linkedin.com/in/julius-pahama>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:packages": "turbo run dev --filter=\"{./packages/*}...\"",
+    "build": "turbo run build",
+    "build:packages": "turbo run build --filter=\"{./packages/*}...\"",
+    "lint": "turbo run lint",
+    "lint:root": "pnpx @biomejs/biome lint",
+    "test": "turbo run test",
+    "test:projects": "vitest run",
+    "test:projects:watch": "vitest --watch",
+    "report": "turbo run test && turbo run report",
+    "view-report": "turbo run test && turbo run view-report"
+  },
+  "devDependencies": {
+    "@eduksource/config": "workspace:*",
+    "@biomejs/biome": "2.5.7",
+    "turbo": "^2.10.8",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.21.0+sha512.521705bce689924eac72f5a3587122f362689ef6571e55ba80076fd637c11132ecffada26fad4ea79c485bfddbfd3d5a2a5b05805a77e893de71ec8a6cca3bb1"
+}

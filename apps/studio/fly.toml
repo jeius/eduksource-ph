@@ -1,0 +1,33 @@
+app = "eduksource-studio"          # change if this name is already taken
+primary_region = "sin"             # Singapore — closest region to PH; change if needed
+
+[build]
+  dockerfile = "./Dockerfile"
+  ignorefile = "../../.dockerignore"
+
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0         # true scale-to-zero — no idle billing
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"               # add a simple health route in your Hono app
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
+
+# No [mounts] / persistent volume — this service is stateless.
+# Generated files should go straight to your S3-compatible object storage,
+# not local disk, so nothing here needs to survive a machine restart.

@@ -9,6 +9,7 @@
     "dev": "turbo run dev",
     "dev:packages": "turbo run dev --filter=\"{./packages/*}...\"",
     "dev:worktree:init": "pnpm install && pnpm build:packages",
+    "dev:worktree:clean": "node ./scripts/clean-worktrees.mjs",
     "build": "turbo run build",
     "build:packages": "turbo run build --filter=\"{./packages/*}...\"",
     "build:docker:studio": "docker build -t eduksource-studio:latest -f apps/studio/Dockerfile .",

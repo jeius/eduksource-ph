@@ -13,6 +13,7 @@
     "check-types": "tsc --noEmit",
     "lint": "pnpx @biomejs/biome lint",
     "format": "pnpx @biomejs/biome format",
+    "fix": "pnpx @biomejs/biome check --write .",
     "test": "vitest run"
   },
   "dependencies": {

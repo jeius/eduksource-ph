@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createLogger } from './logger.js'
 
 describe('logger', () => {
-  const log = createLogger();
+  const log = createLogger()
 
   it('exports logger instance', () => {
     expect(log).toBeDefined()
@@ -22,7 +22,9 @@ describe('logger', () => {
 
   it('logs error level with error serialization without throwing', () => {
     const error = new Error('test error')
-    expect(() => log.withPrefix('[SYSTEM]').withError(error).error('test error message')).not.toThrow()
+    expect(() =>
+      log.withPrefix('[SYSTEM]').withError(error).error('test error message')
+    ).not.toThrow()
   })
 
   it('logs debug level without throwing', () => {

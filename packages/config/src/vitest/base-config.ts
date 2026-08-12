@@ -10,5 +10,6 @@ export const baseConfig = defineConfig({
       provider: 'istanbul',
       enabled: true,
     },
+    setupFiles: ['dotenv/config'],
   },
 });

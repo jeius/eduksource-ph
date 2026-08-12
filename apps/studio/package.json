@@ -5,20 +5,21 @@
   "author": "Julius Pahama <https://www.linkedin.com/in/julius-pahama>",
   "license": "MIT",
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "dev": "tsx --env-file=.env --watch src/index.ts",
     "build": "tsc --project tsconfig.build.json",
     "start": "node --env-file=.env dist/index.js",
     "check-types": "tsc --noEmit",
+    "lint": "pnpx @biomejs/biome lint",
+    "format": "pnpx @biomejs/biome format",
     "test": "vitest run"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.0",
     "@loglayer/hono": "^2.4.0",
     "@loglayer/transport-pino": "^3.3.0",
+    "@hono/zod-validator": "^0.9.0",
     "hono": "^4.13.1",
     "http-status": "^2.1.0",
     "loglayer": "^9.4.0",
@@ -31,8 +32,8 @@
   "devDependencies": {
     "@eduksource/config": "workspace:*",
     "@types/node": "^26.1.1",
+    "@biomejs/biome": "2.5.7",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"
-  },
-  "packageManager": "pnpm@11.21.0+sha512.521705bce689924eac72f5a3587122f362689ef6571e55ba80076fd637c11132ecffada26fad4ea79c485bfddbfd3d5a2a5b05805a77e893de71ec8a6cca3bb1"
+  }
 }

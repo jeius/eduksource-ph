@@ -36,6 +36,9 @@ importers:
       '@hono/node-server':
         specifier: ^2.1.0
         version: 2.1.0(hono@4.13.1)
+      '@hono/zod-validator':
+        specifier: ^0.9.0
+        version: 0.9.0(hono@4.13.1)(zod@4.4.3)
       '@loglayer/hono':
         specifier: ^2.4.0
         version: 2.4.0(hono@4.13.1)(loglayer@9.4.0)
@@ -67,6 +70,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@biomejs/biome':
+        specifier: 2.5.7
+        version: 2.5.7
       '@eduksource/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -445,6 +451,12 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
+
+  '@hono/zod-validator@0.9.0':
+    resolution: {integrity: sha512-n0ZSXmCiHVIp4Y5wlOOyZCeTd/rsawA/qW1cipB8QOYKZ9N8Tk0nZUZCXho9cu374AN4JpDNKioNKBJ/W+LBug==}
+    peerDependencies:
+      hono: '>=4.11.2'
+      zod: ^3.25.0 || ^4.0.0
 
   '@istanbuljs/schema@0.1.6':
     resolution: {integrity: sha512-+Sg6GCR/wy1oSmQDFq4LQDAhm3ETKnorxN+y5nbLULOR3P0c14f2Wurzj3/xqPXtasLFfHd5iRFQ7AJt4KH2cw==}
@@ -1583,6 +1595,11 @@ snapshots:
   '@hono/node-server@2.1.0(hono@4.13.1)':
     dependencies:
       hono: 4.13.1
+
+  '@hono/zod-validator@0.9.0(hono@4.13.1)(zod@4.4.3)':
+    dependencies:
+      hono: 4.13.1
+      zod: 4.4.3
 
   '@istanbuljs/schema@0.1.6': {}
 

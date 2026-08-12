@@ -6,6 +6,7 @@ import { env } from './config/env.js'
 import { createLogger } from './config/logger.js'
 import type { HonoSchema } from './lib/types.js'
 import { errorHandler } from './middlewares/errorHandler.js'
+import { createExtractRoutes } from './routes/extract.js'
 import { createHealthRoutes } from './routes/health.js'
 
 const app = new Hono<HonoSchema>()
@@ -22,11 +23,11 @@ app.onError(errorHandler())
 
 /********* Routes *********/
 app.route('/health', createHealthRoutes())
+app.route('/api', createExtractRoutes())
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
 })
-
 
 export default app
 

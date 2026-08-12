@@ -11,9 +11,12 @@
       "!!**/node_modules"
     ]
   },
+  "assist": {
+    "actions": { "source": { "organizeImports": "on" } }
+  },
   "formatter": {
     "enabled": true,
-    "formatWithErrors": false,
+    "formatWithErrors": true,
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
@@ -47,7 +50,7 @@
   },
   "javascript": {
     "formatter": {
-      "jsxQuoteStyle": "double",
+      "jsxQuoteStyle": "single",
       "quoteProperties": "asNeeded",
       "trailingCommas": "es5",
       "semicolons": "asNeeded",

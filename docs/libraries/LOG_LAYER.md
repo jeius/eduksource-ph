@@ -1,0 +1,340 @@
+# **Title:** Hono Integration
+
+**Source:** [https://loglayer.dev/integrations/hono.html](https://loglayer.dev/integrations/hono.html)
+
+---
+
+## Page Structure Map
+
+```text
+Hono Integration
+├── Hono Integration Server Bun Deno ​
+├── Installation ​
+├── Basic Usage ​
+├── Configuration Options ​
+│   ├── Auto-Logging Configuration ​
+│   ├── Request Log Output ​
+│   ├── Response Log Output ​
+│   └── Example Log Output ​
+└── Examples ​
+    ├── Custom Log Levels ​
+    ├── Disable Request Logging (Response Only) ​
+    ├── Custom Request ID ​
+    ├── Disable Auto-Logging ​
+    ├── Ignore Health Check Paths ​
+    ├── Additional Context from Request ​
+    ├── Error Handling ​
+    ├── Group Routing ​
+    └── Using with Other Hono Middleware ​
+```
+
+---
+
+## Hono Integration Server Bun Deno ​
+
+[](https://www.npmjs.com/package/@loglayer/hono)
+
+Source
+
+A Hono middleware that provides request-scoped logging with automatic request/response logging and error handling. The auto-logging format follows pino-http conventions.
+
+## Installation ​
+
+npm
+
+```bash
+npm i @loglayer/hono loglayer @loglayer/transport-simple-pretty-terminal serialize-error
+```
+
+pnpm
+
+```bash
+pnpm add @loglayer/hono loglayer @loglayer/transport-simple-pretty-terminal serialize-error
+```
+
+yarn
+
+```bash
+yarn add @loglayer/hono loglayer @loglayer/transport-simple-pretty-terminal serialize-error
+```
+
+We're using Simple Pretty Terminal here as an example to get nicely formatted logs. Any LogLayer-compatible transport can be used, including Pino, LogTape, Structured, Console, and others.
+
+## Basic Usage ​
+
+typescript
+
+```ts
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
+import { LogLayer } from "loglayer";
+import { serializeError } from "serialize-error";
+import { getSimplePrettyTerminal, moonlight } from "@loglayer/transport-simple-pretty-terminal";
+import { honoLogLayer, type HonoLogLayerVariables } from "@loglayer/hono";
+
+const log = new LogLayer({
+  errorSerializer: serializeError,
+  transport: getSimplePrettyTerminal({
+    runtime: "node",
+    theme: moonlight,
+  }),
+});
+
+const app = new Hono<{ Variables: HonoLogLayerVariables }>();
+app.use(honoLogLayer({ instance: log }));
+
+app.get("/", (c) => {
+  c.var.logger.info("Hello from route!");
+  return c.text("Hello World!");
+});
+
+app.get("/api/users/:id", (c) => {
+  const id = c.req.param("id");
+  c.var.logger.withMetadata({ userId: id }).info("Fetching user");
+  return c.json({ id, name: "John" });
+});
+
+serve({ fetch: app.fetch, port: 3000 });
+```
+
+Each request automatically gets:
+
+- A child logger with a unique `requestId` in its context
+- Automatic request and response logging following pino-http conventions
+
+The middleware sets a LogLayer child logger on `c.var.logger`, so you can use it directly in your route handlers with full access to LogLayer's API.
+
+TypeScript Support
+
+The package exports a `HonoLogLayerVariables` type. Pass it as a generic to `new Hono<{ Variables: HonoLogLayerVariables }>()` for full type safety with `c.var.logger`. This composes with your own variables:
+
+typescript
+
+```ts
+type AppEnv = { Variables: HonoLogLayerVariables & { user: User } };
+const app = new Hono<AppEnv>();
+```
+
+## Configuration Options ​
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `instance` | `ILogLayer` | _required_ | The LogLayer instance to use |
+| `requestId` | `boolean | (request: Request) => string` | `true` | Controls request ID generation |
+| `autoLogging` | `boolean | HonoAutoLoggingConfig` | `true` | Controls automatic request/response logging |
+| `contextFn` | `(context: { request: Request, path: string }) => Record<string, any>` | \- | Extract additional context from requests |
+| `group` | `boolean | HonoGroupConfig` | \- | Tag auto-logged messages with groups for transport routing |
+
+### Auto-Logging Configuration ​
+
+When `autoLogging` is an object:
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `logLevel` | `string` | `"info"` | Default log level for request/response logs |
+| `ignore` | `Array<string | RegExp>` | `[]` | Paths to exclude from auto-logging |
+| `request` | `boolean | HonoRequestLoggingConfig` | `true` | Controls request logging (fires when request is received) |
+| `response` | `boolean | HonoResponseLoggingConfig` | `true` | Controls response logging (fires after response is sent) |
+
+Both `request` and `response` accept an object with a `logLevel` property to override the default log level.
+
+### Request Log Output ​
+
+When enabled (default), request logging produces:
+
+- **Message**: `"incoming request"`
+- **Metadata**: `{ req: { method, url, remoteAddress } }`
+
+### Response Log Output ​
+
+When enabled (default), response logging produces:
+
+- **Message**: `"request completed"`
+- **Metadata**: `{ req: { method, url, remoteAddress }, res: { statusCode }, responseTime }`
+
+The `remoteAddress` is resolved from `x-forwarded-for` or `x-real-ip` headers.
+
+### Example Log Output ​
+
+With the default configuration using Structured Transport, a `GET /api/users` request produces two log entries:
+
+json
+
+```
+// incoming request
+{
+  "level": "info",
+  "time": "2026-02-12T10:30:45.123Z",
+  "msg": "incoming request",
+  "req": { "method": "GET", "url": "/api/users", "remoteAddress": "127.0.0.1" },
+  "requestId": "550e8400-e29b-41d4-a716-446655440000"
+}
+
+// request completed
+{
+  "level": "info",
+  "time": "2026-02-12T10:30:45.135Z",
+  "msg": "request completed",
+  "req": { "method": "GET", "url": "/api/users", "remoteAddress": "127.0.0.1" },
+  "res": { "statusCode": 200 },
+  "responseTime": 12,
+  "requestId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+## Examples ​
+
+### Custom Log Levels ​
+
+typescript
+
+```
+app.use(honoLogLayer({
+  instance: log,
+  autoLogging: {
+    request: { logLevel: "debug" },
+    response: { logLevel: "info" },
+  },
+}));
+```
+
+### Disable Request Logging (Response Only) ​
+
+typescript
+
+```
+app.use(honoLogLayer({
+  instance: log,
+  autoLogging: {
+    request: false,
+  },
+}));
+```
+
+### Custom Request ID ​
+
+typescript
+
+```
+app.use(honoLogLayer({
+  instance: log,
+  requestId: (request) =>
+    request.headers.get("x-request-id") ?? crypto.randomUUID(),
+}));
+```
+
+### Disable Auto-Logging ​
+
+typescript
+
+```
+app.use(honoLogLayer({
+  instance: log,
+  autoLogging: false,
+}));
+```
+
+### Ignore Health Check Paths ​
+
+typescript
+
+```
+app.use(honoLogLayer({
+  instance: log,
+  autoLogging: {
+    ignore: ["/health", "/ready", /^\/internal\//],
+  },
+}));
+```
+
+### Additional Context from Request ​
+
+typescript
+
+```
+app.use(honoLogLayer({
+  instance: log,
+  contextFn: ({ request }) => ({
+    userAgent: request.headers.get("user-agent"),
+    host: request.headers.get("host"),
+  }),
+}));
+```
+
+### Error Handling ​
+
+Use Hono's `app.onError` handler to log errors with the request-scoped logger:
+
+typescript
+
+```
+app.onError((err, c) => {
+  c.var.logger.withError(err).error("Request error");
+  return c.text("Internal Server Error", 500);
+});
+
+app.get("/fail", () => {
+  throw new Error("Something went wrong");
+  // Automatically logged via app.onError
+});
+```
+
+TIP
+
+Hono's error handler runs after the middleware chain, so `c.var.logger` is available with the full request context (requestId, custom context, etc.).
+
+### Group Routing ​
+
+Tag auto-logged messages (request, response) with groups so you can route or filter them. User logs from route handlers are **not** tagged.
+
+typescript
+
+```
+const log = new LogLayer({
+  transport: [
+    new ConsoleTransport({ id: 'console', logger: console }),
+    new DatadogTransport({ id: 'datadog', logger: datadog }),
+  ],
+  groups: {
+    hono: { transports: ['datadog'] },
+    'hono.request': { transports: ['datadog'] },
+    'hono.response': { transports: ['console', 'datadog'] },
+  },
+})
+
+// Use default group names: request="hono.request", response="hono.response"
+app.use(honoLogLayer({ instance: log, group: true }))
+
+// Or use custom group names
+app.use(honoLogLayer({
+  instance: log,
+  group: {
+    request: 'api.request',  // auto-logged requests
+    response: 'api.response', // auto-logged responses
+  },
+}))
+```
+
+When `group` is `true` or an object:
+
+| Group | Default | Applied to |
+| --- | --- | --- |
+| `request` | `"hono.request"` | Auto-logged incoming request messages |
+| `response` | `"hono.response"` | Auto-logged response messages |
+
+### Using with Other Hono Middleware ​
+
+typescript
+
+```
+import { cors } from "hono/cors";
+
+const app = new Hono();
+app.use(honoLogLayer({ instance: log }));
+app.use(cors());
+
+app.get("/", (c) => {
+  c.var.logger.info("Works with other middleware!");
+  return c.text("ok");
+});
+```

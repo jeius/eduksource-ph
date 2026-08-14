@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest';
 import {
   type BowBlock,
   BowBlockSchema,
@@ -11,7 +11,7 @@ import {
   ExtractResponseSchema,
   LooseBowBlockSchema,
   SkillsFocusSchema,
-} from './extract.js'
+} from './extract.js';
 
 describe('extract v3 schemas', () => {
   const validDocument = {
@@ -49,11 +49,11 @@ describe('extract v3 schemas', () => {
         ],
       },
     ],
-  }
+  };
 
   it('parses a full valid BowDocument', () => {
-    expect(BowDocumentSchema.parse(validDocument)).toEqual(validDocument)
-  })
+    expect(BowDocumentSchema.parse(validDocument)).toEqual(validDocument);
+  });
 
   it('preserves week "*" and range labels verbatim with durationDays', () => {
     const block = BowBlockSchema.parse({
@@ -64,8 +64,8 @@ describe('extract v3 schemas', () => {
       skillsFocus: null,
       strands: [{ strandLabel: null, topicLabel: null, competenciesRaw: '- x' }],
       extractionNotes: null,
-    })
-    expect(block.weekLabel).toBe('*')
+    });
+    expect(block.weekLabel).toBe('*');
     const range = BowBlockSchema.parse({
       weekLabel: '1 to 2 (10 days)',
       durationDays: 10,
@@ -74,15 +74,15 @@ describe('extract v3 schemas', () => {
       skillsFocus: null,
       strands: [{ strandLabel: null, topicLabel: null, competenciesRaw: '- x' }],
       extractionNotes: null,
-    })
-    expect(range.weekLabel).toBe('1 to 2 (10 days)')
-    expect(range.durationDays).toBe(10)
-  })
+    });
+    expect(range.weekLabel).toBe('1 to 2 (10 days)');
+    expect(range.durationDays).toBe(10);
+  });
 
   it('captures multiple content standard entries as separate array items', () => {
-    const doc = BowDocumentSchema.parse(validDocument)
-    expect(doc.terms[0]!.contentStandard).toEqual(['CS 1', 'CS 2'])
-  })
+    const doc = BowDocumentSchema.parse(validDocument);
+    expect(doc.terms[0]!.contentStandard).toEqual(['CS 1', 'CS 2']);
+  });
 
   it('keeps per-block content standard on the block, term-level stays null', () => {
     const block = BowBlockSchema.parse({
@@ -93,8 +93,8 @@ describe('extract v3 schemas', () => {
       skillsFocus: null,
       strands: [{ strandLabel: null, topicLabel: null, competenciesRaw: '- x' }],
       extractionNotes: null,
-    })
-    expect(block.contentStandard).toEqual(['Block CS'])
+    });
+    expect(block.contentStandard).toEqual(['Block CS']);
     const term = BowTermSchema.parse({
       termLabel: 'First Term',
       contentStandard: null,
@@ -103,16 +103,16 @@ describe('extract v3 schemas', () => {
       blocks: [block],
       suggestedActivities: null,
       suggestedPerformanceTasks: null,
-    })
-    expect(term.contentStandard).toBeNull()
-  })
+    });
+    expect(term.contentStandard).toBeNull();
+  });
 
   it('supports skillsFocus with gloss and as plain list', () => {
-    expect(BowDocumentSchema.parse({ ...validDocument, terms: [] })).toBeTruthy()
-    const focus = validDocument.terms[0]!.skillsFocus
-    expect(focus.items[0]!.gloss).toBeNull()
-    expect(focus.sourceLabel).toBe('Essential Life Skills')
-  })
+    expect(BowDocumentSchema.parse({ ...validDocument, terms: [] })).toBeTruthy();
+    const focus = validDocument.terms[0]!.skillsFocus;
+    expect(focus.items[0]!.gloss).toBeNull();
+    expect(focus.sourceLabel).toBe('Essential Life Skills');
+  });
 
   it('captures a multi-item skillsFocus plain list with gloss null', () => {
     const focus = SkillsFocusSchema.parse({
@@ -121,29 +121,29 @@ describe('extract v3 schemas', () => {
         { text: 'Critical thinking', gloss: null },
         { text: 'Collaboration', gloss: null },
       ],
-    })
-    expect(focus.items).toHaveLength(2)
-    expect(focus.items.every((item) => item.gloss === null)).toBe(true)
-  })
+    });
+    expect(focus.items).toHaveLength(2);
+    expect(focus.items.every((item) => item.gloss === null)).toBe(true);
+  });
 
   it('captures skillsFocus with a parenthetical gloss', () => {
     const focus = SkillsFocusSchema.parse({
       sourceLabel: 'Values to be Developed',
       items: [{ text: 'Honesty', gloss: 'paglalahad ng katotohanan' }],
-    })
-    expect(focus.items[0]!.gloss).toBe('paglalahad ng katotohanan')
-  })
+    });
+    expect(focus.items[0]!.gloss).toBe('paglalahad ng katotohanan');
+  });
 
   it('rejects skillsFocus with zero items', () => {
     expect(() =>
       SkillsFocusSchema.parse({ sourceLabel: 'Values to be Developed', items: [] })
-    ).toThrow()
-  })
+    ).toThrow();
+  });
 
   it('allows two strands in a single block', () => {
-    const doc = BowDocumentSchema.parse(validDocument)
-    expect(doc.terms[0]!.blocks[0]!.strands).toHaveLength(2)
-  })
+    const doc = BowDocumentSchema.parse(validDocument);
+    expect(doc.terms[0]!.blocks[0]!.strands).toHaveLength(2);
+  });
 
   it('rejects a block with zero strands', () => {
     expect(() =>
@@ -156,8 +156,8 @@ describe('extract v3 schemas', () => {
         strands: [],
         extractionNotes: null,
       })
-    ).toThrow()
-  })
+    ).toThrow();
+  });
 
   it('loose block schema accepts what strict rejects (salvage boundary)', () => {
     const salvageBoundary = {
@@ -168,15 +168,15 @@ describe('extract v3 schemas', () => {
       skillsFocus: { sourceLabel: 'X', items: [] },
       strands: [],
       extractionNotes: null,
-    }
-    expect(LooseBowBlockSchema.parse(salvageBoundary)).toEqual(salvageBoundary)
-    expect(() => BowBlockSchema.parse(salvageBoundary)).toThrow()
-  })
+    };
+    expect(LooseBowBlockSchema.parse(salvageBoundary)).toEqual(salvageBoundary);
+    expect(() => BowBlockSchema.parse(salvageBoundary)).toThrow();
+  });
 
   it('rejects a document missing required fields', () => {
-    expect(() => ExtractResponseSchema.parse({ text: 'x', pages: 1 })).toThrow()
-    expect(() => BowDocumentSchema.parse({})).toThrow()
-  })
+    expect(() => ExtractResponseSchema.parse({ text: 'x', pages: 1 })).toThrow();
+    expect(() => BowDocumentSchema.parse({})).toThrow();
+  });
 
   it('infers v3 types', () => {
     const response: ExtractResponse = {
@@ -185,14 +185,14 @@ describe('extract v3 schemas', () => {
       document: validDocument,
       warnings: [],
       notes: [],
-    }
-    expect(response.document.terms[0]!.blocks[0]!.strands[0]!.strandLabel).toBe('Geometry')
-    const block: BowBlock = response.document.terms[0]!.blocks[0]!
-    const strand: BowStrand = block.strands[0]!
-    const term: BowTerm = response.document.terms[0]!
-    const doc: BowDocument = response.document
-    expect(strand.competenciesRaw).toContain('Label')
-    expect(term.termLabel).toBe('First Term')
-    expect(doc.learningArea).toBe('General Mathematics')
-  })
-})
+    };
+    expect(response.document.terms[0]!.blocks[0]!.strands[0]!.strandLabel).toBe('Geometry');
+    const block: BowBlock = response.document.terms[0]!.blocks[0]!;
+    const strand: BowStrand = block.strands[0]!;
+    const term: BowTerm = response.document.terms[0]!;
+    const doc: BowDocument = response.document;
+    expect(strand.competenciesRaw).toContain('Label');
+    expect(term.termLabel).toBe('First Term');
+    expect(doc.learningArea).toBe('General Mathematics');
+  });
+});

@@ -1,18 +1,18 @@
-import { PinoTransport } from '@loglayer/transport-pino'
-import { LogLayer, type LogLayerConfig } from 'loglayer'
-import { pino } from 'pino'
-import pretty from 'pino-pretty'
-import { serializeError } from 'serialize-error'
+import { PinoTransport } from '@loglayer/transport-pino';
+import { LogLayer, type LogLayerConfig } from 'loglayer';
+import { pino } from 'pino';
+import pretty from 'pino-pretty';
+import { serializeError } from 'serialize-error';
 
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
 export interface LoggerOptions {
-  level?: LogLevel
-  pretty?: boolean
-  enabled?: boolean
+  level?: LogLevel;
+  pretty?: boolean;
+  enabled?: boolean;
 }
 
-const DEFAULT_LEVEL: LogLevel = 'debug'
+const DEFAULT_LEVEL: LogLevel = 'debug';
 
 function buildConfig(options: Required<LoggerOptions>): LogLayerConfig {
   const base = {
@@ -22,10 +22,10 @@ function buildConfig(options: Required<LoggerOptions>): LogLayerConfig {
     muteContext: false,
     muteMetadata: false,
     copyMsgOnOnlyError: true,
-  }
+  };
 
   if (!options.enabled) {
-    return { ...base, transport: [] }
+    return { ...base, transport: [] };
   }
 
   const stream = options.pretty
@@ -34,13 +34,13 @@ function buildConfig(options: Required<LoggerOptions>): LogLayerConfig {
         translateTime: 'SYS:HH:MM:ss',
         ignore: 'pid,hostname',
       })
-    : undefined
+    : undefined;
 
   // Pino's own level is opened to 'trace' so the underlying logger sees every
   // event. Per-transport gating (info vs error in production) is handled by
   // each transport's own `level` option, so sibling transports configured at
   // lower thresholds still receive the full event stream.
-  const p = pino({ level: 'trace' }, stream)
+  const p = pino({ level: 'trace' }, stream);
 
   return {
     ...base,
@@ -51,7 +51,7 @@ function buildConfig(options: Required<LoggerOptions>): LogLayerConfig {
         level: options.level,
       }),
     ],
-  }
+  };
 }
 
 export function createLogger(options: LoggerOptions = {}): LogLayer {
@@ -59,10 +59,10 @@ export function createLogger(options: LoggerOptions = {}): LogLayer {
     level: options.level ?? DEFAULT_LEVEL,
     pretty: options.pretty ?? true,
     enabled: options.enabled ?? true,
-  }
-  return new LogLayer(buildConfig(resolved))
+  };
+  return new LogLayer(buildConfig(resolved));
 }
 
 export function createSilentLogger(): LogLayer {
-  return createLogger({ enabled: false })
+  return createLogger({ enabled: false });
 }

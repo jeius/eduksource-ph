@@ -2,7 +2,7 @@
 
 An online shop for DepEd Budget-of-Work-aligned teaching materials (PPT, DOCX, PDF), with an AI-assisted internal production pipeline. Built as a Turborepo monorepo.
 
-> **This file is the source of truth** for scope, architecture, and roadmap. Superseders v1 `PROJECT_PLAN.md` and `STUDIO_PLAN.md` — both are merged in here. See `CLAUDE.md` for coding conventions and `/docs/adr/` for individual decision records.
+> **This file is the source of truth** for scope, architecture, and roadmap. Superseders v1 `PROJECT_PLAN.md` and `STUDIO_PLAN.md` — both are merged in here. See `AGENTS.md` for coding conventions and `/docs/adr/` for individual decision records.
 >
 > **Changelog**
 >
@@ -130,6 +130,7 @@ packages/
   db/           # drizzle schema + migrations — used ONLY by api
   auth/         # betterAuth config, shared across api/store/admin
   email/        # resend templates (react-email)
+  logger/       # shared logger (loglayer + pino) — use instead of console.log
   schemas/      # shared zod schemas — includes studio job + generated-product schemas
   config/       # shared tsconfig, biome config
 ```
@@ -187,9 +188,9 @@ This keeps the "api is sole DB gatekeeper" property intact while letting `studio
 
 **Job model:** for the prototype, keep generation **synchronous** (submit → block → get result), matching your original Phase 1 plan. Move to async job + polling (Phase-2-in-STUDIO_PLAN territory) once real generation times make blocking requests impractical — no need to build queueing infrastructure before you know you need it.
 
-### 6.4 Deployment targets (open item, carried over)
+### 6.4 Deployment target (resolved)
 
-`studio` needs a scale-to-zero Node host. Fly.io / Cloud Run / Render are all viable; this is still an open decision (same as it was in the original Studio plan) — revisit before Phase 5 (§11) when Studio starts writing real products. Not blocking for local prototype work.
+`studio` runs on **Fly.io** (`apps/studio/fly.toml`, region `sin`) — chosen from the Fly.io / Cloud Run / Render candidates for its auto-stop machines, which give scale-to-zero without idle bills. Revisit only if cost or cold-start behavior changes at Phase 5+ scale.
 
 ---
 
@@ -257,7 +258,8 @@ Carried over from "how big tech does it," scoped to what's actually worth mainta
   - ADR-0002: Swappable AI provider registry + licensing review trigger
   - ADR-0003: Studio never writes to Postgres directly
   - (Existing ones worth backfilling: Supabase as temp DB, PayMongo as primary payment rail)
-- **`CLAUDE.md`** — coding conventions, already exists, keep it current.
+- **Repo `docs/` conventions** — `docs/adr/` holds ADRs; `docs/libraries/` per-library notes; `docs/models/` model notes; `docs/superpowers/` planning artifacts (plans/specs scratch, not a source of truth — gitignored). Keep `PROJECT_PLAN.md` and `AGENTS.md` the authoritative docs; don't fork content into these dirs.
+- **`AGENTS.md`** — coding conventions, keep it current.
 - **OpenAPI specs** for `api` and `studio`, generated from the Zod schemas you're already writing (`@hono/zod-openapi`) — rendered in `docs` rather than hand-written, so they can't silently go stale.
 - **CHANGELOG.md** per deployable app — auto-generatable from Conventional Commits, near-zero maintenance cost given you're already doing PRs.
 
@@ -277,7 +279,7 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 
 **Track A — Platform**
 
-- [ ] Scaffold Turborepo + pnpm workspaces, Biome, shared tsconfig
+- [✅] Scaffold Turborepo + pnpm workspaces, Biome, shared tsconfig
 - [ ] Cloudflare setup: Workers, R2 bucket, Turnstile
 - [ ] Supabase project + Drizzle schema (users, products, orders, order_items, licenses, coupons, reviews)
 
@@ -370,7 +372,7 @@ Only pursued if the project gains traction and users actually request self-serve
 | Opencode Go API compatibility | Confirm it's OpenAI-compatible before assuming the shared client works unmodified |
 | PDF extraction quality on scanned/irregular BOW formats | May need the vision-model fallback more than expected — validate early in Phase 1 |
 | Generated content accuracy (curriculum alignment) | Human review by editor remains mandatory before anything is sold — not fire-and-forget |
-| Studio Node hosting choice (Fly.io / Cloud Run / Render) | Still open, revisit at Phase 5 |
+| Studio Node hosting | Resolved: Fly.io (region `sin`, auto-stop scale-to-zero). Revisit if cost scales |
 | Supabase marked temporary | Decide long-term DB hosting before scaling |
 | Search engine upgrade (Meilisearch/Typesense) | Revisit once catalog size is known |
 | BIR receipt compliance | Needs research before launch |
@@ -397,7 +399,7 @@ Sketched ahead of time so Phase 7 is a build task, not a design task. Two kinds 
 
 | Content | Canonical location | How `docs` gets it |
 | -------------------- | -------------------------------- | ------------------------------------------------------------------------------------ |
-| `PROJECT_PLAN.md`, `CLAUDE.md` | repo root | prebuild script copies into `apps/docs/content/` — keeps the app self-contained for deployment while root stays the single editable source |
+| `PROJECT_PLAN.md`, `AGENTS.md` | repo root | prebuild script copies into `apps/docs/content/` — keeps the app self-contained for deployment while root stays the single editable source |
 | ADRs | `/docs/adr/*.md` | same prebuild copy step |
 | API reference (`api`) | generated `openapi.json` from `@hono/zod-openapi` | fetched at build/runtime from the deployed `api` service |
 | API reference (`studio`) | generated `openapi.json` from `@hono/zod-openapi` | fetched at build/runtime from the deployed `studio` service |

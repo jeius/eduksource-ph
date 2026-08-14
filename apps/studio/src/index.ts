@@ -1,35 +1,35 @@
-import { serve } from '@hono/node-server'
-import { honoLogLayer } from '@loglayer/hono'
-import { Hono } from 'hono'
-import { prettyJSON } from 'hono/pretty-json'
-import { env } from './config/env.js'
-import { createLogger } from './config/logger.js'
-import type { HonoSchema } from './lib/types.js'
-import { errorHandler } from './middlewares/errorHandler.js'
-import { createExtractRoutes } from './routes/extract.js'
-import { createHealthRoutes } from './routes/health.js'
+import { serve } from '@hono/node-server';
+import { honoLogLayer } from '@loglayer/hono';
+import { Hono } from 'hono';
+import { prettyJSON } from 'hono/pretty-json';
+import { env } from './config/env.js';
+import { createLogger } from './config/logger.js';
+import type { HonoSchema } from './lib/types.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { createExtractRoutes } from './routes/extract.js';
+import { createHealthRoutes } from './routes/health.js';
 
-const app = new Hono<HonoSchema>()
+const app = new Hono<HonoSchema>();
 
 /********* Middlewares *********/
 // Logger
-app.use(honoLogLayer({ instance: createLogger() }))
+app.use(honoLogLayer({ instance: createLogger() }));
 
 // Pretty JSON
-app.use(prettyJSON({ space: 2 }))
+app.use(prettyJSON({ space: 2 }));
 
 // Error Handler
-app.onError(errorHandler())
+app.onError(errorHandler());
 
 /********* Routes *********/
-app.route('/health', createHealthRoutes())
-app.route('/api', createExtractRoutes())
+app.route('/health', createHealthRoutes());
+app.route('/api', createExtractRoutes());
 
 app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+  return c.text('Hello Hono!');
+});
 
-export default app
+export default app;
 
 if (import.meta.main) {
   serve(
@@ -41,7 +41,7 @@ if (import.meta.main) {
       createLogger()
         .withPrefix('[SYSTEM]')
         .withMetadata(info)
-        .info(`Server is running on http://localhost:${info.port}`)
+        .info(`Server is running on http://localhost:${info.port}`);
     }
-  )
+  );
 }

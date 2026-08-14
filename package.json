@@ -16,6 +16,7 @@
     "check-types": "turbo run check-types",
     "lint": "turbo run lint",
     "lint:root": "pnpx @biomejs/biome lint",
+    "fix": "turbo run fix",
     "test": "turbo run test",
     "test:projects": "vitest run",
     "test:projects:watch": "vitest --watch",

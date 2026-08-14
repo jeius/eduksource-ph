@@ -13,7 +13,7 @@ This was already the working assumption from the original Studio prototype plan;
 
 ## Decision
 
-`studio` runs as a standalone Node service on a separate host (candidates: Fly.io, Cloud Run, Render — final choice deferred, see `PROJECT_PLAN.md` §6.4). It is not deployed to Cloudflare Workers. It uses the same API framework (Hono) as `api` for consistency, but a different runtime and deployment pipeline.
+`studio` runs as a standalone Node service on a separate host — **Fly.io** (`apps/studio/fly.toml`, region `sin`), selected from the Fly.io / Cloud Run / Render candidates for its scale-to-zero auto-stop machines (see `PROJECT_PLAN.md` §6.4). It is not deployed to Cloudflare Workers. It uses the same API framework (Hono) as `api` for consistency, but a different runtime and deployment pipeline.
 
 ## Alternatives Considered
 
@@ -30,8 +30,8 @@ This was already the working assumption from the original Studio prototype plan;
 
 **Gets harder / new obligations:**
 
-- Two deployment pipelines to maintain instead of one (Workers for platform, whatever host is chosen for Studio).
+- Two deployment pipelines to maintain instead of one (Workers for platform, Fly.io for Studio).
 - `studio` can't use `api`'s native R2 Workers binding — it needs its own R2 access via the S3-compatible API (separate credentials, separate client library).
 - `studio` isn't behind the same BetterAuth session flow as the rest of the platform (different domain/runtime), so it needs its own service-to-service auth scheme — see the internal service token approach in `PROJECT_PLAN.md` §8.
 - One more environment to monitor, deploy, and pay for, even at scale-to-zero.
-- The Node host choice itself is still open and needs to be settled before Phase 5 of the roadmap, when Studio starts writing real products.
+- The Node host is settled (Fly.io); revisit only if cost or cold-start behavior at Phase 5+ scale warrants it.

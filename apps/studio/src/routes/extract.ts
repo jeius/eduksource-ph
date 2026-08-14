@@ -1,31 +1,31 @@
-import { zValidator } from '@hono/zod-validator'
-import { Hono } from 'hono'
-import { z } from 'zod'
-import { extractionCache } from '../lib/cache.js'
-import { defaultModel, type NimUsage, nimChatDetailed, nimVisionChat } from '../lib/nim.js'
-import { extractText, pdfPagesToPngs, TooManyPagesError } from '../lib/pdf.js'
-import type { HonoSchema } from '../lib/types.js'
+import { zValidator } from '@hono/zod-validator';
+import { Hono } from 'hono';
+import { z } from 'zod';
+import { extractionCache } from '../lib/cache.js';
+import { defaultModel, type NimUsage, nimChatDetailed, nimVisionChat } from '../lib/nim.js';
+import { extractText, pdfPagesToPngs, TooManyPagesError } from '../lib/pdf.js';
+import type { HonoSchema } from '../lib/types.js';
 import {
   BowBlockSchema,
   type BowDocument,
   type BowTerm,
   type ExtractResponse,
   LooseBowDocumentSchema,
-} from '../schemas/extract.js'
+} from '../schemas/extract.js';
 
-const MAX_PAGES = 20
-const VISION_BATCH_SIZE = 5
-const MAX_BYTES = 10 * 1024 * 1024 // 10 MB
-const TOKEN_ESTIMATE_FACTOR = 1.3
-const TOKEN_BUDGET_RATIO = 0.8
-const CONTEXT_WINDOW = 128_000 // NIM model context window
-const MAX_EXTRACTION_OUTPUT_TOKENS = 32_768 // headroom for large single-term JSON
-const MIN_TEXT_FOR_UNPDF = 100
-const VALID_BLOCK_RATIO = 0.8
+const MAX_PAGES = 20;
+const VISION_BATCH_SIZE = 5;
+const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+const TOKEN_ESTIMATE_FACTOR = 1.3;
+const TOKEN_BUDGET_RATIO = 0.8;
+const CONTEXT_WINDOW = 128_000; // NIM model context window
+const MAX_EXTRACTION_OUTPUT_TOKENS = 32_768; // headroom for large single-term JSON
+const MIN_TEXT_FOR_UNPDF = 100;
+const VALID_BLOCK_RATIO = 0.8;
 
 const FileUploadSchema = z.object({
   file: z.instanceof(File).refine((f) => f.type === 'application/pdf', 'Must be PDF'),
-})
+});
 
 const SCHEMA_JSON = `{
   "learningArea": "string",
@@ -64,7 +64,7 @@ const SCHEMA_JSON = `{
       ]
     }
   ]
-}`
+}`;
 
 function buildSystemPrompt(): string {
   return `You are extracting structured curriculum data from a Philippine DepEd Budget of Work (BOW)
@@ -116,13 +116,13 @@ Begin your response directly with the opening brace of the JSON object and end
 with its closing brace. Do not wrap the JSON in markdown code fences.
 
 Schema:
-${SCHEMA_JSON}`
+${SCHEMA_JSON}`;
 }
 
 function buildUserPrompt(extractedText: string): string {
   return `Extract structured data from the following BOW document text:
 
-${extractedText}`
+${extractedText}`;
 }
 
 function splitByTerm(text: string): string[] {
@@ -130,48 +130,48 @@ function splitByTerm(text: string): string[] {
     .split(
       /(?=First Term|Second Term|Third Term|Unang Termino|Ikalawang Termino|Ikatlong Termino)/i
     )
-    .filter(Boolean)
-  return sections.length > 0 ? sections : [text]
+    .filter(Boolean);
+  return sections.length > 0 ? sections : [text];
 }
 
 class ExtractionParseError extends Error {
-  raw: string
+  raw: string;
   constructor(raw: string, message: string) {
-    super(message)
-    this.name = 'ExtractionParseError'
-    this.raw = raw
+    super(message);
+    this.name = 'ExtractionParseError';
+    this.raw = raw;
   }
 }
 
 class ExtractionTruncatedError extends Error {
-  raw: string
+  raw: string;
   constructor(raw: string, message: string) {
-    super(message)
-    this.name = 'ExtractionTruncatedError'
-    this.raw = raw
+    super(message);
+    this.name = 'ExtractionTruncatedError';
+    this.raw = raw;
   }
 }
 
 class ExtractionValidationError extends Error {
-  omitted: number
-  total: number
+  omitted: number;
+  total: number;
   constructor(omitted: number, total: number) {
-    super(`Too many competency blocks failed validation (${omitted} of ${total} omitted)`)
-    this.name = 'ExtractionValidationError'
-    this.omitted = omitted
-    this.total = total
+    super(`Too many competency blocks failed validation (${omitted} of ${total} omitted)`);
+    this.name = 'ExtractionValidationError';
+    this.omitted = omitted;
+    this.total = total;
   }
 }
 
 async function extractBowDocument(
   text: string
 ): Promise<{ document: BowDocument; usage: NimUsage }> {
-  const systemPrompt = buildSystemPrompt()
-  const userPrompt = buildUserPrompt(text)
+  const systemPrompt = buildSystemPrompt();
+  const userPrompt = buildUserPrompt(text);
   const extractionOpts = {
     model: defaultModel,
     max_completion_tokens: MAX_EXTRACTION_OUTPUT_TOKENS,
-  }
+  };
 
   const first = await nimChatDetailed(
     [
@@ -179,19 +179,19 @@ async function extractBowDocument(
       { role: 'user', content: userPrompt },
     ],
     extractionOpts
-  )
+  );
 
   try {
-    const document = LooseBowDocumentSchema.parse(JSON.parse(first.content ?? ''))
-    return { document, usage: first.usage }
+    const document = LooseBowDocumentSchema.parse(JSON.parse(first.content ?? ''));
+    return { document, usage: first.usage };
   } catch (err) {
     // If the model hit its output-token cap the retry will truncate the same
     // way — signal truncation so the caller can split by term instead.
     if (first.finishReason === 'length') {
-      throw new ExtractionTruncatedError(first.content ?? '', 'LLM output truncated (token limit)')
+      throw new ExtractionTruncatedError(first.content ?? '', 'LLM output truncated (token limit)');
     }
 
-    const errorMsg = err instanceof Error ? err.message : 'Unknown parse error'
+    const errorMsg = err instanceof Error ? err.message : 'Unknown parse error';
     const retry = await nimChatDetailed(
       [
         { role: 'system', content: systemPrompt },
@@ -201,21 +201,21 @@ async function extractBowDocument(
         },
       ],
       extractionOpts
-    )
+    );
     try {
-      const document = LooseBowDocumentSchema.parse(JSON.parse(retry.content ?? ''))
-      return { document, usage: mergeUsage(first.usage, retry.usage) }
+      const document = LooseBowDocumentSchema.parse(JSON.parse(retry.content ?? ''));
+      return { document, usage: mergeUsage(first.usage, retry.usage) };
     } catch (retryErr) {
       if (retry.finishReason === 'length') {
         throw new ExtractionTruncatedError(
           retry.content ?? '',
           'LLM output truncated (token limit)'
-        )
+        );
       }
       throw new ExtractionParseError(
         retry.content ?? '',
         `Failed to parse LLM output: ${retryErr instanceof Error ? retryErr.message : 'Unknown'}`
-      )
+      );
     }
   }
 }
@@ -224,110 +224,110 @@ function mergeUsage(...usages: NimUsage[]): NimUsage {
   return usages.reduce(
     (acc, u) => ({ input: acc.input + u.input, output: acc.output + u.output }),
     { input: 0, output: 0 }
-  )
+  );
 }
 
 async function extractByTermSections(
   text: string
 ): Promise<{ document: BowDocument; usage: NimUsage }> {
-  const sections = splitByTerm(text)
-  const usages: NimUsage[] = []
-  const terms: BowTerm[] = []
-  let learningArea = ''
-  let gradeLevel = ''
-  let documentNotes: string | null = null
+  const sections = splitByTerm(text);
+  const usages: NimUsage[] = [];
+  const terms: BowTerm[] = [];
+  let learningArea = '';
+  let gradeLevel = '';
+  let documentNotes: string | null = null;
 
   for (const section of sections) {
-    const { document, usage } = await extractBowDocument(section)
-    usages.push(usage)
-    terms.push(...document.terms)
-    learningArea ||= document.learningArea
-    gradeLevel ||= document.gradeLevel
-    documentNotes ??= document.documentNotes
+    const { document, usage } = await extractBowDocument(section);
+    usages.push(usage);
+    terms.push(...document.terms);
+    learningArea ||= document.learningArea;
+    gradeLevel ||= document.gradeLevel;
+    documentNotes ??= document.documentNotes;
   }
 
   return {
     document: { learningArea, gradeLevel, documentNotes, terms },
     usage: mergeUsage(...usages),
-  }
+  };
 }
 
 async function extractDocument(text: string): Promise<{ document: BowDocument; usage: NimUsage }> {
   const estimatedTokens = Math.ceil(
     (text.length + buildSystemPrompt().length) * TOKEN_ESTIMATE_FACTOR
-  )
-  const maxTokens = Math.floor(CONTEXT_WINDOW * TOKEN_BUDGET_RATIO)
+  );
+  const maxTokens = Math.floor(CONTEXT_WINDOW * TOKEN_BUDGET_RATIO);
 
   if (estimatedTokens > maxTokens) {
-    return extractByTermSections(text)
+    return extractByTermSections(text);
   }
 
   try {
-    return await extractBowDocument(text)
+    return await extractBowDocument(text);
   } catch (err) {
     // A single call's JSON output hit the model's token cap — retrying would
     // truncate the same way. Recover by extracting per-term instead, which
     // shrinks each response below the cap.
     if (err instanceof ExtractionTruncatedError) {
-      return extractByTermSections(text)
+      return extractByTermSections(text);
     }
-    throw err
+    throw err;
   }
 }
 
 function validateDocument(document: BowDocument): {
-  document: BowDocument
-  warnings: string[]
-  notes: string[]
+  document: BowDocument;
+  warnings: string[];
+  notes: string[];
 } {
-  const warnings: string[] = []
-  const notes: string[] = []
-  let totalBlocks = 0
-  let omittedBlocks = 0
+  const warnings: string[] = [];
+  const notes: string[] = [];
+  let totalBlocks = 0;
+  let omittedBlocks = 0;
 
   const terms = document.terms.map((term) => ({
     ...term,
     blocks: term.blocks.filter((block) => {
-      totalBlocks++
-      const parsed = BowBlockSchema.safeParse(block)
+      totalBlocks++;
+      const parsed = BowBlockSchema.safeParse(block);
       if (parsed.success) {
-        if (block.extractionNotes) notes.push(block.extractionNotes)
-        return true
+        if (block.extractionNotes) notes.push(block.extractionNotes);
+        return true;
       }
-      omittedBlocks++
+      omittedBlocks++;
       warnings.push(
         `Competency block validation failed (week ${block.weekLabel}): ${parsed.error.message}`
-      )
-      return false
+      );
+      return false;
     }),
-  }))
+  }));
 
   if (totalBlocks > 0 && omittedBlocks / totalBlocks > 1 - VALID_BLOCK_RATIO) {
-    throw new ExtractionValidationError(omittedBlocks, totalBlocks)
+    throw new ExtractionValidationError(omittedBlocks, totalBlocks);
   }
 
   if (omittedBlocks > 0) {
-    warnings.push(`${omittedBlocks} competency blocks omitted due to validation failure`)
+    warnings.push(`${omittedBlocks} competency blocks omitted due to validation failure`);
   }
 
-  return { document: { ...document, terms }, warnings, notes }
+  return { document: { ...document, terms }, warnings, notes };
 }
 
 export function createExtractRoutes() {
-  const app = new Hono<HonoSchema>()
+  const app = new Hono<HonoSchema>();
 
   app.post('/extract', zValidator('form', FileUploadSchema), async (c) => {
-    const startMs = Date.now()
-    const { file } = c.req.valid('form')
+    const startMs = Date.now();
+    const { file } = c.req.valid('form');
 
     if (file.size > MAX_BYTES) {
-      return c.json({ error: 'File too large (max 10 MB)' }, 413)
+      return c.json({ error: 'File too large (max 10 MB)' }, 413);
     }
 
-    const buffer = new Uint8Array(await file.arrayBuffer())
-    const fileHash = await extractionCache.hashFile(buffer)
+    const buffer = new Uint8Array(await file.arrayBuffer());
+    const fileHash = await extractionCache.hashFile(buffer);
 
-    const cached = extractionCache.get(fileHash)
+    const cached = extractionCache.get(fileHash);
     if (cached) {
       c.var.logger
         .withMetadata({
@@ -340,42 +340,42 @@ export function createExtractRoutes() {
           learningArea: cached.document.learningArea,
           termCount: cached.document.terms.length,
         })
-        .info('extraction cache hit')
-      return c.json(cached)
+        .info('extraction cache hit');
+      return c.json(cached);
     }
 
-    let text = ''
-    let pages = 0
-    let path: 'unpdf' | 'vision-fallback' = 'unpdf'
+    let text = '';
+    let pages = 0;
+    let path: 'unpdf' | 'vision-fallback' = 'unpdf';
 
     try {
-      const result = await extractText(buffer)
-      text = result.text
-      pages = result.pages
+      const result = await extractText(buffer);
+      text = result.text;
+      pages = result.pages;
     } catch {
-      path = 'vision-fallback'
+      path = 'vision-fallback';
     }
 
     if (pages > MAX_PAGES) {
-      return c.json({ error: `Too many pages (max ${MAX_PAGES})` }, 413)
+      return c.json({ error: `Too many pages (max ${MAX_PAGES})` }, 413);
     }
 
     if (!text || text.length < MIN_TEXT_FOR_UNPDF) {
-      path = 'vision-fallback'
+      path = 'vision-fallback';
       try {
-        const pageImages = await pdfPagesToPngs(buffer, MAX_PAGES)
-        pages = pageImages.length
-        const prompt = 'Extract all text from this BOW document. Return raw text only.'
-        const chunks: string[] = []
+        const pageImages = await pdfPagesToPngs(buffer, MAX_PAGES);
+        pages = pageImages.length;
+        const prompt = 'Extract all text from this BOW document. Return raw text only.';
+        const chunks: string[] = [];
         for (let i = 0; i < pageImages.length; i += VISION_BATCH_SIZE) {
-          const batch = pageImages.slice(i, i + VISION_BATCH_SIZE)
-          const batchText = await nimVisionChat(batch, prompt)
-          chunks.push(batchText)
+          const batch = pageImages.slice(i, i + VISION_BATCH_SIZE);
+          const batchText = await nimVisionChat(batch, prompt);
+          chunks.push(batchText);
         }
-        text = chunks.join('\n\n')
+        text = chunks.join('\n\n');
       } catch (err) {
         if (err instanceof TooManyPagesError) {
-          return c.json({ error: `Too many pages (max ${MAX_PAGES})` }, 413)
+          return c.json({ error: `Too many pages (max ${MAX_PAGES})` }, 413);
         }
         c.var.logger
           .withError(err as Error)
@@ -383,8 +383,8 @@ export function createExtractRoutes() {
             fileHash,
             path: 'vision-fallback',
           })
-          .error('Vision fallback failed (unpdf + render/OCR both errored)')
-        return c.json({ error: 'Failed to extract text from PDF' }, 500)
+          .error('Vision fallback failed (unpdf + render/OCR both errored)');
+        return c.json({ error: 'Failed to extract text from PDF' }, 500);
       }
     }
 
@@ -395,40 +395,40 @@ export function createExtractRoutes() {
         document: { learningArea: '', gradeLevel: '', documentNotes: null, terms: [] },
         warnings: [],
         notes: [],
-      }
-      extractionCache.set(fileHash, emptyResponse)
-      return c.json(emptyResponse)
+      };
+      extractionCache.set(fileHash, emptyResponse);
+      return c.json(emptyResponse);
     }
 
-    let document: BowDocument
-    let usage: NimUsage
-    let validated: BowDocument
-    let warnings: string[]
-    let notes: string[]
+    let document: BowDocument;
+    let usage: NimUsage;
+    let validated: BowDocument;
+    let warnings: string[];
+    let notes: string[];
     try {
-      const result = await extractDocument(text)
-      document = result.document
-      usage = result.usage
-      const validatedResult = validateDocument(document)
-      validated = validatedResult.document
-      warnings = validatedResult.warnings
-      notes = validatedResult.notes
+      const result = await extractDocument(text);
+      document = result.document;
+      usage = result.usage;
+      const validatedResult = validateDocument(document);
+      validated = validatedResult.document;
+      warnings = validatedResult.warnings;
+      notes = validatedResult.notes;
     } catch (err) {
       if (err instanceof ExtractionParseError) {
-        return c.json({ error: err.message, raw: err.raw }, 500)
+        return c.json({ error: err.message, raw: err.raw }, 500);
       }
       if (err instanceof ExtractionTruncatedError) {
-        return c.json({ error: err.message, raw: err.raw }, 500)
+        return c.json({ error: err.message, raw: err.raw }, 500);
       }
       if (err instanceof ExtractionValidationError) {
-        return c.json({ error: err.message, omitted: err.omitted }, 500)
+        return c.json({ error: err.message, omitted: err.omitted }, 500);
       }
-      throw err
+      throw err;
     }
 
-    const response: ExtractResponse = { text, pages, document: validated, warnings, notes }
+    const response: ExtractResponse = { text, pages, document: validated, warnings, notes };
 
-    extractionCache.set(fileHash, response)
+    extractionCache.set(fileHash, response);
 
     c.var.logger
       .withMetadata({
@@ -442,10 +442,10 @@ export function createExtractRoutes() {
         learningArea: validated.learningArea,
         termCount: validated.terms.length,
       })
-      .info('extraction completed')
+      .info('extraction completed');
 
-    return c.json(response)
-  })
+    return c.json(response);
+  });
 
-  return app
+  return app;
 }

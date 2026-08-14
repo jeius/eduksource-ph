@@ -41,7 +41,8 @@
       "style": {
         "useConst": "error",
         "noDefaultExport": "off",
-        "useNodejsImportProtocol": "off"
+        "useNodejsImportProtocol": "off",
+        "useTemplate": "off"
       },
       "nursery": {
         "noFloatingPromises": "error"
@@ -53,8 +54,6 @@
       "jsxQuoteStyle": "single",
       "quoteProperties": "asNeeded",
       "trailingCommas": "es5",
-      "semicolons": "asNeeded",
-      "arrowParentheses": "always",
       "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto",

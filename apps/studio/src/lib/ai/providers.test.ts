@@ -1,11 +1,46 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// Deterministic env: tests must never depend on the developer's .env.
+const TEST_ENV: Record<string, string> = {
+  NODE_ENV: 'test',
+  PORT: '3000',
+  NVIDIA_API_KEY: 'test-nim-key',
+  NVIDIA_NIM_BASE_URL: 'https://nim.test/v1',
+  NIM_MODEL_REASONING: 'test-nim-reasoning',
+  NIM_MODEL_OCR: 'test-nim-ocr',
+  NIM_MODEL_IMAGE: 'test-nim-image',
+};
+
+const TEST_UNSET: string[] = [
+  'AI_PROVIDER',
+  'AI_MODEL_EXTRACTION',
+  'AI_MODEL_OCR',
+  'AI_MODEL_LESSON_PLAN',
+  'AI_MODEL_SUMMATIVE_TEST',
+  'AI_MODEL_IMAGE',
+  'OPENROUTER_API_KEY',
+  'OPENROUTER_MODEL_EXTRACTION',
+  'OPENROUTER_MODEL_OCR',
+  'OPENROUTER_MODEL_LESSON_PLAN',
+  'OPENROUTER_MODEL_SUMMATIVE_TEST',
+  'OPENROUTER_MODEL_IMAGE',
+  'OPENCODE_API_KEY',
+  'OPENCODE_BASE_URL',
+  'OPENCODE_MODEL_EXTRACTION',
+  'OPENCODE_MODEL_OCR',
+  'OPENCODE_MODEL_LESSON_PLAN',
+  'OPENCODE_MODEL_SUMMATIVE_TEST',
+  'OPENCODE_MODEL_IMAGE',
+];
+
 async function loadProviders(overrides: Record<string, string | undefined>) {
   vi.resetModules();
-  vi.stubEnv('AI_PROVIDER', undefined);
-  vi.stubEnv('OPENROUTER_API_KEY', undefined);
-  vi.stubEnv('OPENCODE_API_KEY', undefined);
-  vi.stubEnv('OPENCODE_BASE_URL', undefined);
+  for (const [key, value] of Object.entries(TEST_ENV)) {
+    vi.stubEnv(key, value);
+  }
+  for (const key of TEST_UNSET) {
+    vi.stubEnv(key, undefined);
+  }
   for (const [key, value] of Object.entries(overrides)) {
     vi.stubEnv(key, value);
   }

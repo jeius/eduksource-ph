@@ -45,6 +45,9 @@ importers:
       '@loglayer/transport-pino':
         specifier: ^3.3.0
         version: 3.3.0(pino@10.3.1)
+      '@napi-rs/canvas':
+        specifier: ^1.0.5
+        version: 1.0.5
       hono:
         specifier: ^4.13.1
         version: 4.13.1
@@ -1790,7 +1793,6 @@ snapshots:
       '@napi-rs/canvas-linux-x64-musl': 1.0.5
       '@napi-rs/canvas-win32-arm64-msvc': 1.0.5
       '@napi-rs/canvas-win32-x64-msvc': 1.0.5
-    optional: true
 
   '@oxc-project/types@0.143.0': {}
 

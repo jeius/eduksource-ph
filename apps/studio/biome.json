@@ -1,4 +1,16 @@
 {
   "root": false,
-  "extends": ["./node_modules/@eduksource/config/biome/base.json"]
+  "extends": ["./node_modules/@eduksource/config/biome/base.json"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
+    }
+  ]
 }

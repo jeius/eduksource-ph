@@ -6,7 +6,13 @@ describe('ExtractionCache', () => {
   it('stores and retrieves by hash', async () => {
     const cache = new ExtractionCache()
     const hash = await cache.hashFile(new Uint8Array([1, 2, 3]))
-    const payload: ExtractResponse = { text: 'x', pages: 1, terms: [], warnings: [], notes: [] }
+    const payload: ExtractResponse = {
+      text: 'x',
+      pages: 1,
+      document: { learningArea: '', gradeLevel: '', documentNotes: null, terms: [] },
+      warnings: [],
+      notes: [],
+    }
     cache.set(hash, payload)
     const got = cache.get(hash)
     expect(got).toEqual(payload)
@@ -29,14 +35,26 @@ describe('ExtractionCache', () => {
   it('clears all entries', async () => {
     const cache = new ExtractionCache()
     const hash = await cache.hashFile(new Uint8Array([1]))
-    cache.set(hash, { text: 'x', pages: 1, terms: [], warnings: [], notes: [] })
+    cache.set(hash, {
+      text: 'x',
+      pages: 1,
+      document: { learningArea: '', gradeLevel: '', documentNotes: null, terms: [] },
+      warnings: [],
+      notes: [],
+    })
     cache.clear()
     expect(cache.get(hash)).toBeUndefined()
   })
 
   it('exported singleton works', async () => {
     const hash = await extractionCache.hashFile(new Uint8Array([9, 9, 9]))
-    const payload: ExtractResponse = { text: 'y', pages: 2, terms: [], warnings: [], notes: [] }
+    const payload: ExtractResponse = {
+      text: 'y',
+      pages: 2,
+      document: { learningArea: '', gradeLevel: '', documentNotes: null, terms: [] },
+      warnings: [],
+      notes: [],
+    }
     extractionCache.set(hash, payload)
     expect(extractionCache.get(hash)).toEqual(payload)
   })

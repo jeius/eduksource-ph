@@ -1,0 +1,14 @@
+{
+  "extends": "./node_modules/@eduksource/config/typescript/node.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

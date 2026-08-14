@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createLogger } from './logger.js'
+import { createLogger, createSilentLogger } from './logger.js'
 
 describe('logger', () => {
   const log = createLogger()
@@ -47,5 +47,18 @@ describe('logger', () => {
     const metaLog = createLogger().withMetadata({ username: 'Jeius' })
     expect(metaLog).toBeDefined()
     expect(() => metaLog.info('metadata message')).not.toThrow()
+  })
+
+  it('createSilentLogger produces a logger with no transport', () => {
+    const silent = createSilentLogger()
+    expect(silent).toBeDefined()
+    expect(() => silent.info('silent message')).not.toThrow()
+    expect(() => silent.error('silent error')).not.toThrow()
+  })
+
+  it('createLogger accepts a custom level', () => {
+    const errorLog = createLogger({ level: 'error' })
+    expect(errorLog).toBeDefined()
+    expect(() => errorLog.error('error only message')).not.toThrow()
   })
 })

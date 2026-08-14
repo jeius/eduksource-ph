@@ -15,11 +15,12 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "dependsOn": ["^build"]
     },
     "test": {
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/vitest.config.ts"],
-      "dependsOn": ["transit", "@eduksource/config#build"],
+      "dependsOn": ["transit", "@eduksource/config#build", "@eduksource/logger#build"],
       "outputs": ["coverage/blob/**"]
     },
     "transit": {

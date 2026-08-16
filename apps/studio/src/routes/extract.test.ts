@@ -347,6 +347,26 @@ describe('POST /api/extract', () => {
     expect(body.document.terms.map((t) => t.termLabel)).toEqual(['First Term', 'Second Term']);
   });
 
+  it('clamps max_completion_tokens to the provider window budget', async () => {
+    windowHolder.value = 10_000;
+    mockChatOk();
+    mockedExtractText.mockResolvedValue({ text: 'A'.repeat(400), pages: 1 });
+    const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
+    expect(res.status).toBe(200);
+    const opts = mockedNimChatDetailed.mock.calls[0]![1] as { max_completion_tokens: number };
+    expect(opts.max_completion_tokens).toBeLessThan(32_768);
+    expect(opts.max_completion_tokens).toBeGreaterThan(0);
+  });
+
+  it('keeps the 32_768 output cap at the default window', async () => {
+    mockChatOk();
+    mockedExtractText.mockResolvedValue({ text: 'A'.repeat(400), pages: 1 });
+    const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
+    expect(res.status).toBe(200);
+    const opts = mockedNimChatDetailed.mock.calls[0]![1] as { max_completion_tokens: number };
+    expect(opts.max_completion_tokens).toBe(32_768);
+  });
+
   it('omits invalid blocks and returns valid blocks plus a warning', async () => {
     const badBlock = {
       weekLabel: '2',

@@ -173,9 +173,17 @@ async function extractBowDocument(
 ): Promise<{ document: BowDocument; usage: NimUsage }> {
   const systemPrompt = buildSystemPrompt();
   const userPrompt = buildUserPrompt(text);
+  const outputBudget = Math.floor(defaultContextWindow * TOKEN_BUDGET_RATIO);
+  // Output must never push input+output past the provider's window: cap it at
+  // the window budget minus the estimated prompt, and never above the fixed
+  // per-task headroom. Clamped to 1 so a tiny window can't produce 0.
+  const maxCompletionTokens = Math.min(
+    MAX_EXTRACTION_OUTPUT_TOKENS,
+    Math.max(1, outputBudget - estimateTokens(systemPrompt + userPrompt))
+  );
   const extractionOpts = {
     model: defaultModel,
-    max_completion_tokens: MAX_EXTRACTION_OUTPUT_TOKENS,
+    max_completion_tokens: maxCompletionTokens,
   };
 
   const first = await nimChatDetailed(
@@ -257,10 +265,12 @@ async function extractByTermSections(
   };
 }
 
+function estimateTokens(input: string): number {
+  return Math.ceil(input.length * TOKEN_ESTIMATE_FACTOR);
+}
+
 async function extractDocument(text: string): Promise<{ document: BowDocument; usage: NimUsage }> {
-  const estimatedTokens = Math.ceil(
-    (text.length + buildSystemPrompt().length) * TOKEN_ESTIMATE_FACTOR
-  );
+  const estimatedTokens = estimateTokens(text + buildSystemPrompt());
   const maxTokens = Math.floor(defaultContextWindow * TOKEN_BUDGET_RATIO);
 
   if (estimatedTokens > maxTokens) {

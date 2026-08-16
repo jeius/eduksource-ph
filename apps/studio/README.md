@@ -21,7 +21,8 @@ Optional:
 
 - `AI_PROVIDER` — `nim` (default) | `openrouter` | `opencode`
 - `AI_MODEL_EXTRACTION`, `AI_MODEL_OCR`, `AI_MODEL_LESSON_PLAN`, `AI_MODEL_SUMMATIVE_TEST`, `AI_MODEL_IMAGE` — per-task model overrides
-- `NIM_BASE_URL`, `NIM_CONTEXT_WINDOW`, `NIM_MODEL_EXTRACTION`, `NIM_MODEL_OCR`, `NIM_MODEL_LESSON_PLAN`, `NIM_MODEL_SUMMATIVE_TEST`, `NIM_MODEL_IMAGE` — primary provider (per-task keys default to NIM's default models if unset; context window defaults to 128k)
+- `NIM_BASE_URL`, `NIM_CONTEXT_WINDOW` — primary provider (context window defaults to 128k)
+- `NIM_MODEL_EXTRACTION`, `NIM_MODEL_OCR`, `NIM_MODEL_LESSON_PLAN`, `NIM_MODEL_SUMMATIVE_TEST`, `NIM_MODEL_IMAGE` — primary provider per-task models (no defaults — set each of these or use the `AI_MODEL_*` overrides above, or model resolution throws)
 - `OPENROUTER_API_KEY`, `OPENROUTER_BASE_URL`, `OPENROUTER_CONTEXT_WINDOW`, `OPENROUTER_MODEL_EXTRACTION`, `OPENROUTER_MODEL_OCR`, `OPENROUTER_MODEL_LESSON_PLAN`, `OPENROUTER_MODEL_SUMMATIVE_TEST`, `OPENROUTER_MODEL_IMAGE` — secondary provider (comma-separated values = OpenRouter native model fallback array)
 - `OPENCODE_API_KEY`, `OPENCODE_BASE_URL`, `OPENCODE_CONTEXT_WINDOW`, `OPENCODE_MODEL_EXTRACTION`, `OPENCODE_MODEL_OCR`, `OPENCODE_MODEL_LESSON_PLAN`, `OPENCODE_MODEL_SUMMATIVE_TEST`, `OPENCODE_MODEL_IMAGE` — tertiary provider
 

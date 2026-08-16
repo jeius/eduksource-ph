@@ -200,7 +200,7 @@ Since you want to swap providers/models opportunistically (NIM being unreliable 
 
 ```ts
 // apps/studio/src/lib/ai/providers.ts
-type TaskType = "extraction" | "lesson_plan" | "summative_test" | "image";
+type TaskType = "extraction" | "ocr" | "lesson_plan" | "summative_test" | "image";
 
 type ProviderConfig = {
   baseURL: string;

@@ -38,10 +38,10 @@ describe('createHealthRoutes', () => {
     expect(await res.json()).toEqual({ status: 'ok' });
   });
 
-  it('returns 200 with status ok for `/nim`', async () => {
+  it('returns 200 with status ok for `/chat`', async () => {
     mockedNimChat.mockResolvedValue('pong');
     const app = createHealthRoutes();
-    const res = await app.request('/nim');
+    const res = await app.request('/chat');
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.status).toEqual('ok');
@@ -51,23 +51,23 @@ describe('createHealthRoutes', () => {
     );
   });
 
-  it('returns 500 with status failed when NIM call throws', async () => {
-    mockedNimChat.mockRejectedValue(new Error('NIM congestion'));
+  it('returns 500 with status failed when the primary provider call throws', async () => {
+    mockedNimChat.mockRejectedValue(new Error('provider congestion'));
     const app = createHealthRoutes();
-    const res = await app.request('/nim');
+    const res = await app.request('/chat');
     const data = await res.json();
     expect(res.status).toBe(500);
     expect(data.status).toEqual('failed');
-    expect(data.error).toBe('NIM congestion');
+    expect(data.error).toBe('provider congestion');
   });
 
-  it('returns SSE stream for `/nim/stream`', async () => {
+  it('returns SSE stream for `/chat/stream`', async () => {
     mockedNimChatStreamText.mockImplementation(async function* () {
       yield 'Why do programmers prefer dark mode?';
       yield 'Because light attracts bugs.';
     });
     const app = createHealthRoutes();
-    const res = await app.request('/nim/stream');
+    const res = await app.request('/chat/stream');
 
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('text/event-stream');
@@ -84,7 +84,7 @@ describe('createHealthRoutes', () => {
       throw new Error('stream failed');
     });
     const app = createHealthRoutes();
-    const res = await app.request('/nim/stream');
+    const res = await app.request('/chat/stream');
 
     expect(res.status).toBe(200);
     const fullText = await res.text();

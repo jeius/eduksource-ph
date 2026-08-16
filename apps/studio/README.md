@@ -36,8 +36,8 @@ Server on http://localhost:$PORT.
 ## Endpoints
 
 - `GET /health` — liveness
-- `GET /health/nim` — primary AI provider ping
-- `GET /health/nim/stream` — streaming ping
+- `GET /health/chat` — primary AI provider ping
+- `GET /health/chat/stream` — streaming ping
 - `GET /health/providers` — configured providers + per-task models
 - `POST /api/extract` — multipart `file` (PDF) → structured BOW JSON
 

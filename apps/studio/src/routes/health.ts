@@ -15,7 +15,7 @@ export function createHealthRoutes() {
     return c.json({ status: 'ok' }, 200);
   });
 
-  health.get('/nim', async (c) => {
+  health.get('/chat', async (c) => {
     try {
       const reply = await nimChat([{ role: 'user', content: 'Reply with exactly: pong' }]);
       return c.json({ status: 'ok', reply }, 200);
@@ -24,7 +24,7 @@ export function createHealthRoutes() {
     }
   });
 
-  health.get('/nim/stream', async (c) => {
+  health.get('/chat/stream', async (c) => {
     return streamSSE(c, async (sseStream) => {
       try {
         for await (const chunk of nimChatStreamText(

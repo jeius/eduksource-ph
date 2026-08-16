@@ -19,7 +19,7 @@ Build an internal provider registry inside `apps/studio` (not a shared package �
 - Automatic single-retry fallback to a configured secondary provider on error or rate limit, so a NIM outage at peak doesn't require manually flipping a switch mid-incident.
 - OpenRouter's own `models: [...]` fallback array is used for fallback *within* OpenRouter; the registry's fallback handles the *cross-provider* case (OpenRouter itself down → try NIM/Opencode).
 
-Opencode Go's API compatibility with the OpenAI chat completion format has not yet been confirmed. If it isn't compatible, it needs its own thin adapter behind the same registry interface rather than being assumed to work with the shared client.
+Opencode Go's API is OpenAI chat-completions compatible (confirmed 2026-08-16) — the shared `openai` client works against it unmodified through the registry, no provider-specific adapter needed.
 
 ## Alternatives Considered
 
@@ -37,6 +37,6 @@ Opencode Go's API compatibility with the OpenAI chat completion format has not y
 
 **Gets harder / new obligations:**
 
-- Opencode Go's API shape needs to be confirmed before this registry can safely include it; may require a provider-specific adapter.
+- Opencode Go API compatibility is confirmed (2026-08-16) — it uses the shared `openai` client through the registry without an adapter.
 - AI provider "production use" licensing terms need to be reviewed **per provider**, not just for NIM, before Studio output is sold — this must happen before Phase 5 of the roadmap and again any time the primary provider changes.
 - Slightly more moving parts than a single hardcoded client — acceptable trade-off given the explicit goal of provider flexibility.

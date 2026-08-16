@@ -215,7 +215,7 @@ const providers: Record<string, ProviderConfig> = {
 };
 ```
 
-- NIM and OpenRouter both expose OpenAI-compatible chat completion endpoints, so the standard `openai` npm client works against either just by swapping `baseURL`/`apiKey` — no need for a heavier SDK. **Confirm Opencode Go's API shape** before assuming the same client works there; if it's not OpenAI-compatible, it needs its own thin adapter behind the same interface.
+- NIM and OpenRouter both expose OpenAI-compatible chat completion endpoints, so the standard `openai` npm client works against either just by swapping `baseURL`/`apiKey` — no need for a heavier SDK. **Opencode Go confirmed OpenAI-compatible too (2026-08-16)** — the same client works against all three providers unmodified, no adapter needed.
 - Active provider selected via env var (`AI_PROVIDER=openrouter`), overridable per task (`AI_MODEL_LESSON_PLAN=...`) so you can e.g. run extraction on a cheap/fast model and lesson-plan generation on a stronger one, independent of which provider is "primary" this week.
 - Add a simple fallback: if the primary provider errors or rate-limits, retry once against a configured secondary provider. This directly addresses "NIM is unreliable at peak times" without you having to manually flip a switch mid-outage.
 - OpenRouter specifically supports a `models: [...]` fallback array in a single request — worth using as your OpenRouter-internal fallback layer, with your own registry handling the *cross-provider* fallback (OpenRouter down entirely → try NIM/Opencode).
@@ -369,7 +369,7 @@ Only pursued if the project gains traction and users actually request self-serve
 | Risk / Question | Notes |
 | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
 | AI provider licensing (per-provider "production use" terms) | Applies to whichever of NIM/OpenRouter/Opencode Go ends up primary once Studio output is actually sold — confirm before Phase 5 |
-| Opencode Go API compatibility | Confirm it's OpenAI-compatible before assuming the shared client works unmodified |
+| Opencode Go API compatibility | Resolved 2026-08-16 — confirmed OpenAI-compatible; shared `openai` client works unmodified against all three providers |
 | PDF extraction quality on scanned/irregular BOW formats | May need the vision-model fallback more than expected — validate early in Phase 1 |
 | Generated content accuracy (curriculum alignment) | Human review by editor remains mandatory before anything is sold — not fire-and-forget |
 | Studio Node hosting | Resolved: Fly.io (region `sin`, auto-stop scale-to-zero). Revisit if cost scales |

@@ -293,7 +293,7 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 - [ ] DOCX generation: lesson plan JSON → Word doc via `docx` (npm)
 - [ ] Summative/term test generation route: structured question/answer JSON
 - [ ] Manual end-to-end test: one BOW PDF → all four outputs, reviewed by hand
-- [ ] **New:** build the provider registry (§7) — even if only NIM is wired up first, structure it as swappable from day one so adding OpenRouter/Opencode later is a config change, not a refactor
+- [✅] **New:** build the provider registry (§7) — even if only NIM is wired up first, structure it as swappable from day one so adding OpenRouter/Opencode later is a config change, not a refactor
 
 **Exit criteria:** platform monorepo boots; a single BOW PDF can be run through the full Studio pipeline locally, producing a usable (if unpolished) lesson plan, deck, doc, and test.
 

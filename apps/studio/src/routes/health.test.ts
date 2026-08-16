@@ -46,9 +46,9 @@ describe('createHealthRoutes', () => {
     expect(res.status).toBe(200);
     expect(data.status).toEqual('ok');
     expect(data.reply).toBe('pong');
-    expect(mockedNimChat).toHaveBeenCalledWith(
-      [{ role: 'user', content: 'Reply with exactly: pong' }]
-    );
+    expect(mockedNimChat).toHaveBeenCalledWith([
+      { role: 'user', content: 'Reply with exactly: pong' },
+    ]);
   });
 
   it('returns 500 with status failed when the primary provider call throws', async () => {

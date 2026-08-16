@@ -7,5 +7,5 @@ const env = config({ path: resolve(import.meta.dirname, '.env.test') });
 
 export default defineConfig({
   ...baseConfig,
-  test: { ...baseConfig.test, env: env.parsed, environment: 'node', setupFiles: []},
+  test: { ...baseConfig.test, env: env.parsed, environment: 'node', setupFiles: [] },
 });

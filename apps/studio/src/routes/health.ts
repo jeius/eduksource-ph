@@ -27,9 +27,9 @@ export function createHealthRoutes() {
   health.get('/chat/stream', async (c) => {
     return streamSSE(c, async (sseStream) => {
       try {
-        for await (const chunk of nimChatStreamText(
-          [{ role: 'user', content: 'Write me a dad joke for developers...' }]
-        )) {
+        for await (const chunk of nimChatStreamText([
+          { role: 'user', content: 'Write me a dad joke for developers...' },
+        ])) {
           await sseStream.writeSSE({ data: chunk });
         }
       } catch (err) {

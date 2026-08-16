@@ -14,6 +14,8 @@ export type NimUsage = ChatUsage;
 
 export const defaultModel = resolveModel(getPrimaryProvider(), 'extraction');
 
+export const defaultContextWindow = getPrimaryProvider().contextWindow;
+
 export async function nimChat(
   messages: ChatMessage[],
   opts: ChatOptions = { model: defaultModel }

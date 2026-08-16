@@ -17,6 +17,7 @@ const { mockedExtractionCache } = vi.hoisted(() => ({
 
 vi.mock('../lib/nim.js', () => ({
   defaultModel: 'test-model',
+  defaultContextWindow: 128_000,
   nimChatDetailed: mockedNimChatDetailed,
   nimVisionChat: vi.fn().mockResolvedValue(''),
 }));

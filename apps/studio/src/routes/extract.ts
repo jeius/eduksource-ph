@@ -2,7 +2,13 @@ import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { extractionCache } from '../lib/cache.js';
-import { defaultModel, type NimUsage, nimChatDetailed, nimVisionChat } from '../lib/nim.js';
+import {
+  defaultContextWindow,
+  defaultModel,
+  type NimUsage,
+  nimChatDetailed,
+  nimVisionChat,
+} from '../lib/nim.js';
 import { extractText, pdfPagesToPngs, TooManyPagesError } from '../lib/pdf.js';
 import type { HonoSchema } from '../lib/types.js';
 import {
@@ -18,7 +24,6 @@ const VISION_BATCH_SIZE = 5;
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 const TOKEN_ESTIMATE_FACTOR = 1.3;
 const TOKEN_BUDGET_RATIO = 0.8;
-const CONTEXT_WINDOW = 128_000; // NIM model context window
 const MAX_EXTRACTION_OUTPUT_TOKENS = 32_768; // headroom for large single-term JSON
 const MIN_TEXT_FOR_UNPDF = 100;
 const VALID_BLOCK_RATIO = 0.8;
@@ -256,7 +261,7 @@ async function extractDocument(text: string): Promise<{ document: BowDocument; u
   const estimatedTokens = Math.ceil(
     (text.length + buildSystemPrompt().length) * TOKEN_ESTIMATE_FACTOR
   );
-  const maxTokens = Math.floor(CONTEXT_WINDOW * TOKEN_BUDGET_RATIO);
+  const maxTokens = Math.floor(defaultContextWindow * TOKEN_BUDGET_RATIO);
 
   if (estimatedTokens > maxTokens) {
     return extractByTermSections(text);

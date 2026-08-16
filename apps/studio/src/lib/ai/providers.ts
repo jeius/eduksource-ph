@@ -16,6 +16,7 @@ export interface ProviderConfig {
   name: ProviderName;
   baseURL: string | null;
   apiKey: string | null;
+  contextWindow: number;
   models: Partial<Record<TaskType, string | string[]>>;
 }
 
@@ -34,6 +35,7 @@ const ALL_PROVIDERS: ProviderConfig[] = [
     name: 'nim',
     baseURL: env.NIM_BASE_URL,
     apiKey: env.NIM_API_KEY,
+    contextWindow: env.NIM_CONTEXT_WINDOW,
     models: {
       extraction: env.NIM_MODEL_EXTRACTION,
       ocr: env.NIM_MODEL_OCR,
@@ -46,6 +48,7 @@ const ALL_PROVIDERS: ProviderConfig[] = [
     name: 'openrouter',
     baseURL: env.OPENROUTER_BASE_URL ?? null,
     apiKey: env.OPENROUTER_API_KEY ?? null,
+    contextWindow: env.OPENROUTER_CONTEXT_WINDOW,
     models: {
       extraction: splitList(env.OPENROUTER_MODEL_EXTRACTION),
       ocr: splitList(env.OPENROUTER_MODEL_OCR),
@@ -58,6 +61,7 @@ const ALL_PROVIDERS: ProviderConfig[] = [
     name: 'opencode',
     baseURL: env.OPENCODE_BASE_URL ?? null,
     apiKey: env.OPENCODE_API_KEY ?? null,
+    contextWindow: env.OPENCODE_CONTEXT_WINDOW,
     models: {
       extraction: env.OPENCODE_MODEL_EXTRACTION,
       ocr: env.OPENCODE_MODEL_OCR,

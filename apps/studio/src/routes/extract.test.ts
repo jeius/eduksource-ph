@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSilentLogger } from '../config/logger.js';
 import type { BowDocument, ExtractResponse } from '../schemas/extract.js';
 
+const { windowHolder } = vi.hoisted(() => ({ windowHolder: { value: 128_000 } }));
+
 const { mockedNimChatDetailed, mockedNimVisionChat } = vi.hoisted(() => ({
   mockedNimChatDetailed: vi.fn(),
   mockedNimVisionChat: vi.fn(),
@@ -31,6 +33,9 @@ const { mockedExtractionCache } = vi.hoisted(() => ({
 
 vi.mock('../lib/nim.js', () => ({
   defaultModel: 'test-model',
+  get defaultContextWindow() {
+    return windowHolder.value;
+  },
   nimChatDetailed: mockedNimChatDetailed,
   nimVisionChat: mockedNimVisionChat,
 }));
@@ -105,6 +110,7 @@ describe('POST /api/extract', () => {
   });
 
   afterEach(() => {
+    windowHolder.value = 128_000;
     vi.resetAllMocks();
   });
 
@@ -313,6 +319,32 @@ describe('POST /api/extract', () => {
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.terms.map((t) => t.termLabel)).toEqual(['First Term', 'Second Term']);
     expect(body.document.learningArea).toBe('Math');
+  });
+
+  it('splits by term when the provider context window is small', async () => {
+    windowHolder.value = 1_000;
+    mockedExtractText.mockResolvedValue({
+      text: 'First Term ' + 'A'.repeat(400) + ' Second Term ' + 'B'.repeat(400),
+      pages: 1,
+    });
+    mockedNimChatDetailed
+      .mockResolvedValueOnce({
+        content: JSON.stringify({ ...validDoc, terms: [validDoc.terms[0]] }),
+        usage: { input: 10, output: 5 },
+      })
+      .mockResolvedValueOnce({
+        content: JSON.stringify({
+          ...validDoc,
+          learningArea: '',
+          terms: [{ ...validDoc.terms[0], termLabel: 'Second Term' }],
+        }),
+        usage: { input: 8, output: 4 },
+      });
+    const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
+    expect(res.status).toBe(200);
+    expect(mockedNimChatDetailed).toHaveBeenCalledTimes(2);
+    const body = (await res.json()) as ExtractResponse;
+    expect(body.document.terms.map((t) => t.termLabel)).toEqual(['First Term', 'Second Term']);
   });
 
   it('omits invalid blocks and returns valid blocks plus a warning', async () => {

@@ -58,6 +58,9 @@ const TEST_UNSET: string[] = [
   'OPENCODE_MODEL_LESSON_PLAN',
   'OPENCODE_MODEL_SUMMATIVE_TEST',
   'OPENCODE_MODEL_IMAGE',
+  'NIM_CONTEXT_WINDOW',
+  'OPENROUTER_CONTEXT_WINDOW',
+  'OPENCODE_CONTEXT_WINDOW',
 ];
 
 async function loadClient(overrides: Record<string, string | undefined>) {

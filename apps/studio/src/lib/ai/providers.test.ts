@@ -35,12 +35,15 @@ const TEST_UNSET: string[] = [
   'OPENCODE_MODEL_LESSON_PLAN',
   'OPENCODE_MODEL_SUMMATIVE_TEST',
   'OPENCODE_MODEL_IMAGE',
+  'NIM_CONTEXT_WINDOW',
+  'OPENROUTER_CONTEXT_WINDOW',
+  'OPENCODE_CONTEXT_WINDOW',
 ];
 
 async function loadProviders(overrides: Record<string, string | undefined>) {
   vi.resetModules();
   for (const [key, value] of Object.entries(TEST_ENV)) {
-    vi.stubEnv(key, value);
+    vi.stubEnv(key, value as string);
   }
   for (const key of TEST_UNSET) {
     vi.stubEnv(key, undefined);
@@ -171,6 +174,39 @@ describe('resolveModelList', () => {
 
   it('returns undefined for providers with a plain string model', async () => {
     const { providers } = await loadProviders({});
-    expect(providers.resolveModelList(providers.getPrimaryProvider(), 'extraction')).toBeUndefined();
+    expect(
+      providers.resolveModelList(providers.getPrimaryProvider(), 'extraction')
+    ).toBeUndefined();
+  });
+});
+
+describe('contextWindow', () => {
+  it('defaults to 128_000 when unset', async () => {
+    const { providers } = await loadProviders({});
+    expect(providers.getPrimaryProvider().contextWindow).toBe(128_000);
+  });
+
+  it('reads the NIM_CONTEXT_WINDOW override', async () => {
+    const { providers } = await loadProviders({ NIM_CONTEXT_WINDOW: '64000' });
+    expect(providers.getPrimaryProvider().contextWindow).toBe(64_000);
+  });
+
+  it('defaults openrouter to 128_000 when configured', async () => {
+    const { providers } = await loadProviders({ OPENROUTER_API_KEY: 'sk-or-test' });
+    const openrouter = providers
+      .getConfiguredProviders()
+      .find((p: { name: string }) => p.name === 'openrouter');
+    if (!openrouter) throw new Error('openrouter should be configured');
+    expect(openrouter.contextWindow).toBe(128_000);
+  });
+
+  it('rejects zero and negative context windows', async () => {
+    for (const bad of ['0', '-1']) {
+      await expect(loadProviders({ NIM_CONTEXT_WINDOW: bad })).rejects.toThrow();
+    }
+  });
+
+  it('rejects non-numeric context windows', async () => {
+    await expect(loadProviders({ NIM_CONTEXT_WINDOW: 'abc' })).rejects.toThrow();
   });
 });

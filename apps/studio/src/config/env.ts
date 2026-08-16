@@ -16,6 +16,7 @@ const envSchema = z.object({
   NIM_MODEL_LESSON_PLAN: z.string().optional(),
   NIM_MODEL_SUMMATIVE_TEST: z.string().optional(),
   NIM_MODEL_IMAGE: z.string().optional(),
+  NIM_CONTEXT_WINDOW: z.coerce.number().int().positive().default(128_000),
 
   // Optional secondary/tertiary providers — skipped when the key is absent.
   // Comma-separated model values: extra entries become OpenRouter's native
@@ -27,6 +28,7 @@ const envSchema = z.object({
   OPENROUTER_MODEL_LESSON_PLAN: z.string().optional(),
   OPENROUTER_MODEL_SUMMATIVE_TEST: z.string().optional(),
   OPENROUTER_MODEL_IMAGE: z.string().optional(),
+  OPENROUTER_CONTEXT_WINDOW: z.coerce.number().int().positive().default(128_000),
 
   OPENCODE_API_KEY: z.string().optional(),
   OPENCODE_BASE_URL: z.url().default('https://opencode.ai/zen/go/v1'),
@@ -35,6 +37,7 @@ const envSchema = z.object({
   OPENCODE_MODEL_LESSON_PLAN: z.string().optional(),
   OPENCODE_MODEL_SUMMATIVE_TEST: z.string().optional(),
   OPENCODE_MODEL_IMAGE: z.string().optional(),
+  OPENCODE_CONTEXT_WINDOW: z.coerce.number().int().positive().default(128_000),
 
   NODE_ENV: z.enum(['production', 'development', 'test']),
   PORT: z.coerce.number().int(),

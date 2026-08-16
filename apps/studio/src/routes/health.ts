@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
+import { chat, chatStreamText } from '../lib/ai/client.js';
 import {
   getConfiguredProviders,
   getPrimaryProvider,
   resolveModel,
   TASK_TYPES,
 } from '../lib/ai/providers.js';
-import { chat, chatStreamText } from '../lib/ai/client.js';
 
 export function createHealthRoutes() {
   const health = new Hono();

@@ -1,8 +1,8 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { extractionCache } from '../lib/cache.js';
 import { type ChatUsage, chatDetailed, visionChat } from '../lib/ai/client.js';
 import { primaryContextWindow } from '../lib/ai/providers.js';
+import { extractionCache } from '../lib/cache.js';
 import { extractText, pdfPagesToPngs, TooManyPagesError } from '../lib/pdf.js';
 import type { HonoSchema } from '../lib/types.js';
 import {

@@ -1,13 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Env } from '../../config/env.js';
 
 // Deterministic env: tests must never depend on the developer's .env.
-const TEST_ENV: Record<string, string> = {
+const TEST_ENV: Partial<Omit<Env, 'PORT'> & { PORT: string }> = {
   NODE_ENV: 'test',
   PORT: '3000',
-  NVIDIA_API_KEY: 'test-nim-key',
-  NVIDIA_NIM_BASE_URL: 'https://nim.test/v1',
-  NIM_MODEL_REASONING: 'test-nim-reasoning',
+  NIM_API_KEY: 'test-nim-key',
+  NIM_BASE_URL: 'https://nim.test/v1',
+  NIM_MODEL_EXTRACTION: 'test-nim-extraction',
+  NIM_MODEL_LESSON_PLAN: '',
   NIM_MODEL_OCR: 'test-nim-ocr',
+  NIM_MODEL_SUMMATIVE_TEST: 'test-nim-summative',
   NIM_MODEL_IMAGE: 'test-nim-image',
 };
 
@@ -19,6 +22,7 @@ const TEST_UNSET: string[] = [
   'AI_MODEL_SUMMATIVE_TEST',
   'AI_MODEL_IMAGE',
   'OPENROUTER_API_KEY',
+  'OPENROUTER_BASE_URL',
   'OPENROUTER_MODEL_EXTRACTION',
   'OPENROUTER_MODEL_OCR',
   'OPENROUTER_MODEL_LESSON_PLAN',
@@ -99,7 +103,7 @@ describe('resolveModel', () => {
   it('returns the provider model for the task', async () => {
     const { providers, env } = await loadProviders({});
     expect(providers.resolveModel(providers.getPrimaryProvider(), 'extraction')).toBe(
-      env.NIM_MODEL_REASONING
+      env.NIM_MODEL_EXTRACTION
     );
   });
 

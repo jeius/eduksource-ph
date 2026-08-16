@@ -1,4 +1,4 @@
-import { env } from '../../config/env.js';
+import { type Env, env } from '../../config/env.js';
 
 export type TaskType = 'extraction' | 'ocr' | 'lesson_plan' | 'summative_test' | 'image';
 
@@ -10,7 +10,7 @@ export const TASK_TYPES: TaskType[] = [
   'image',
 ];
 
-export type ProviderName = 'nim' | 'openrouter' | 'opencode';
+export type ProviderName = Env['AI_PROVIDER'];
 
 export interface ProviderConfig {
   name: ProviderName;
@@ -18,8 +18,6 @@ export interface ProviderConfig {
   apiKey: string | null;
   models: Partial<Record<TaskType, string | string[]>>;
 }
-
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
 // Comma-separated env value → model list. OpenRouter sends the whole list as
 // its native `models` fallback array; NIM/Opencode use the first entry only.
@@ -34,17 +32,19 @@ function splitList(value: string | undefined): string[] | undefined {
 const ALL_PROVIDERS: ProviderConfig[] = [
   {
     name: 'nim',
-    baseURL: env.NVIDIA_NIM_BASE_URL,
-    apiKey: env.NVIDIA_API_KEY,
+    baseURL: env.NIM_BASE_URL,
+    apiKey: env.NIM_API_KEY,
     models: {
-      extraction: env.NIM_MODEL_REASONING,
+      extraction: env.NIM_MODEL_EXTRACTION,
       ocr: env.NIM_MODEL_OCR,
+      lesson_plan: env.NIM_MODEL_LESSON_PLAN,
+      summative_test: env.NIM_MODEL_SUMMATIVE_TEST,
       image: env.NIM_MODEL_IMAGE,
     },
   },
   {
     name: 'openrouter',
-    baseURL: OPENROUTER_BASE_URL,
+    baseURL: env.OPENROUTER_BASE_URL ?? null,
     apiKey: env.OPENROUTER_API_KEY ?? null,
     models: {
       extraction: splitList(env.OPENROUTER_MODEL_EXTRACTION),
@@ -91,20 +91,26 @@ const TASK_OVERRIDES: Record<TaskType, string | undefined> = {
 };
 
 export function resolveModel(provider: ProviderConfig, task: TaskType): string {
-  const override = TASK_OVERRIDES[task];
+  const override = TASK_OVERRIDES[task]?.trim();
   if (override) return override;
   const configured = provider.models[task];
-  if (typeof configured === 'string') return configured;
-  if (Array.isArray(configured)) {
-    const first = configured[0];
+  if (typeof configured === 'string') {
+    const trimmed = configured.trim();
+    if (trimmed) return trimmed;
+  } else if (Array.isArray(configured)) {
+    const first = configured[0]?.trim();
     if (first) return first;
   }
   throw new Error(`No model configured for task "${task}" on provider "${provider.name}"`);
 }
 
 export function resolveModelList(provider: ProviderConfig, task: TaskType): string[] | undefined {
-  const override = TASK_OVERRIDES[task];
+  const override = TASK_OVERRIDES[task]?.trim();
   if (override) return [override];
   const configured = provider.models[task];
-  return Array.isArray(configured) ? configured : undefined;
+  if (Array.isArray(configured)) {
+    const arr = configured.map((c) => c.trim()).filter(Boolean);
+    return arr;
+  }
+  return undefined;
 }

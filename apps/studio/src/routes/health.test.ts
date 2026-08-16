@@ -47,8 +47,7 @@ describe('createHealthRoutes', () => {
     expect(data.status).toEqual('ok');
     expect(data.reply).toBe('pong');
     expect(mockedNimChat).toHaveBeenCalledWith(
-      [{ role: 'user', content: 'Reply with exactly: pong' }],
-      expect.objectContaining({ model: expect.any(String) })
+      [{ role: 'user', content: 'Reply with exactly: pong' }]
     );
   });
 

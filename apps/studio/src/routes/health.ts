@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { env } from '../config/env.js';
 import {
   getConfiguredProviders,
   getPrimaryProvider,
@@ -18,9 +17,7 @@ export function createHealthRoutes() {
 
   health.get('/nim', async (c) => {
     try {
-      const reply = await nimChat([{ role: 'user', content: 'Reply with exactly: pong' }], {
-        model: env.NIM_MODEL_REASONING,
-      });
+      const reply = await nimChat([{ role: 'user', content: 'Reply with exactly: pong' }]);
       return c.json({ status: 'ok', reply }, 200);
     } catch (err) {
       return c.json({ status: 'failed', error: (err as Error).message }, 500);
@@ -31,8 +28,7 @@ export function createHealthRoutes() {
     return streamSSE(c, async (sseStream) => {
       try {
         for await (const chunk of nimChatStreamText(
-          [{ role: 'user', content: 'Write me a dad joke for developers...' }],
-          { model: env.NIM_MODEL_REASONING }
+          [{ role: 'user', content: 'Write me a dad joke for developers...' }]
         )) {
           await sseStream.writeSSE({ data: chunk });
         }

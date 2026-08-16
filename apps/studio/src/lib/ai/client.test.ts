@@ -29,11 +29,12 @@ const completion = {
 const TEST_ENV: Record<string, string> = {
   NODE_ENV: 'test',
   PORT: '3000',
-  NVIDIA_API_KEY: 'test-nim-key',
-  NVIDIA_NIM_BASE_URL: 'https://nim.test/v1',
-  NIM_MODEL_REASONING: 'test-nim-reasoning',
+  NIM_API_KEY: 'test-nim-key',
+  NIM_BASE_URL: 'https://nim.test/v1',
+  NIM_MODEL_LESSON_PLAN: 'test-nim-lesson-plan',
   NIM_MODEL_OCR: 'test-nim-ocr',
   NIM_MODEL_IMAGE: 'test-nim-image',
+  NIM_MODEL_EXTRACTION: 'test-nim-extraction',
 };
 
 const TEST_UNSET: string[] = [
@@ -44,6 +45,7 @@ const TEST_UNSET: string[] = [
   'AI_MODEL_SUMMATIVE_TEST',
   'AI_MODEL_IMAGE',
   'OPENROUTER_API_KEY',
+  'OPENROUTER_BASE_URL',
   'OPENROUTER_MODEL_EXTRACTION',
   'OPENROUTER_MODEL_OCR',
   'OPENROUTER_MODEL_LESSON_PLAN',
@@ -89,9 +91,9 @@ describe('chatDetailed', () => {
 
     expect(mockCreate).toHaveBeenCalledTimes(1);
     expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ model: env.NIM_MODEL_REASONING, stream: false })
+      expect.objectContaining({ model: env.NIM_MODEL_EXTRACTION, stream: false })
     );
-    expect(instances[0]!.baseURL).toBe(env.NVIDIA_NIM_BASE_URL);
+    expect(instances[0]!.baseURL).toBe(env.NIM_BASE_URL);
     expect(result).toEqual({
       content: '{"ok":true}',
       usage: { input: 120, output: 45 },

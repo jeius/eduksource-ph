@@ -14,19 +14,31 @@ export type NimUsage = ChatUsage;
 
 export const defaultModel = resolveModel(getPrimaryProvider(), 'extraction');
 
-export async function nimChat(messages: ChatMessage[], opts: ChatOptions = {}) {
+export async function nimChat(
+  messages: ChatMessage[],
+  opts: ChatOptions = { model: defaultModel }
+) {
   return chat(messages, opts);
 }
 
-export async function nimChatDetailed(messages: ChatMessage[], opts: ChatOptions = {}) {
+export async function nimChatDetailed(
+  messages: ChatMessage[],
+  opts: ChatOptions = { model: defaultModel }
+) {
   return chatDetailed(messages, opts);
 }
 
-export async function nimChatStream(messages: ChatMessage[], opts: ChatOptions = {}) {
+export async function nimChatStream(
+  messages: ChatMessage[],
+  opts: ChatOptions = { model: defaultModel }
+) {
   return chatStream(messages, opts);
 }
 
-export async function* nimChatStreamText(messages: ChatMessage[], opts: ChatOptions = {}) {
+export async function* nimChatStreamText(
+  messages: ChatMessage[],
+  opts: ChatOptions = { model: defaultModel }
+) {
   yield* chatStreamText(messages, opts);
 }
 

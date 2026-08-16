@@ -51,3 +51,10 @@ export async function pdfPagesToPngs(file: Uint8Array, maxPages: number): Promis
     await doc.loadingTask.destroy();
   }
 }
+
+export async function isPdfFile(file: File): Promise<boolean> {
+  const buffer = await file.slice(0, 5).arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  const header = new TextDecoder().decode(bytes);
+  return header === '%PDF-';
+}

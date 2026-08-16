@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isPdfFile } from '../lib/pdf.js';
 
 export const SkillsFocusItemSchema = z.object({
   text: z.string(),
@@ -71,6 +72,13 @@ export const LooseBowDocumentSchema = BowDocumentSchema.extend({
   ),
 });
 
+export const FileUploadSchema = z.object({
+  file: z.instanceof(File).refine(async (f) => {
+    if (f.type === 'application/pdf') return true;
+    return (await isPdfFile(f)) && f.name.toLowerCase().endsWith('.pdf');
+  }, 'Must be PDF'),
+});
+
 export type SkillsFocusItem = z.infer<typeof SkillsFocusItemSchema>;
 export type SkillsFocus = z.infer<typeof SkillsFocusSchema>;
 export type BowStrand = z.infer<typeof BowStrandSchema>;
@@ -78,3 +86,5 @@ export type BowBlock = z.infer<typeof BowBlockSchema>;
 export type BowTerm = z.infer<typeof BowTermSchema>;
 export type BowDocument = z.infer<typeof BowDocumentSchema>;
 export type ExtractResponse = z.infer<typeof ExtractResponseSchema>;
+
+export type FileUpload = z.infer<typeof FileUploadSchema>;

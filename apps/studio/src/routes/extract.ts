@@ -1,6 +1,5 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { z } from 'zod';
 import { extractionCache } from '../lib/cache.js';
 import {
   defaultContextWindow,
@@ -16,6 +15,7 @@ import {
   type BowDocument,
   type BowTerm,
   type ExtractResponse,
+  FileUploadSchema,
   LooseBowDocumentSchema,
 } from '../schemas/extract.js';
 
@@ -27,10 +27,6 @@ const TOKEN_BUDGET_RATIO = 0.8;
 const MAX_EXTRACTION_OUTPUT_TOKENS = 32_768; // headroom for large single-term JSON
 const MIN_TEXT_FOR_UNPDF = 100;
 const VALID_BLOCK_RATIO = 0.8;
-
-const FileUploadSchema = z.object({
-  file: z.instanceof(File).refine((f) => f.type === 'application/pdf', 'Must be PDF'),
-});
 
 const SCHEMA_JSON = `{
   "learningArea": "string",

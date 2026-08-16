@@ -44,6 +44,7 @@ vi.mock('../lib/pdf.js', () => ({
   extractText: mockedExtractText,
   pdfPagesToPngs: mockedPdfPagesToPngs,
   TooManyPagesError: mockedTooManyPagesError,
+  isPdfFile: vi.fn().mockResolvedValue(false),
 }));
 
 vi.mock('../lib/cache.js', () => ({

@@ -217,7 +217,7 @@ const providers: Record<string, ProviderConfig> = {
 
 - NIM and OpenRouter both expose OpenAI-compatible chat completion endpoints, so the standard `openai` npm client works against either just by swapping `baseURL`/`apiKey` — no need for a heavier SDK. **Opencode Go confirmed OpenAI-compatible too (2026-08-16)** — the same client works against all three providers unmodified, no adapter needed.
 - Active provider selected via env var (`AI_PROVIDER=openrouter`), overridable per task (`AI_MODEL_LESSON_PLAN=...`) so you can e.g. run extraction on a cheap/fast model and lesson-plan generation on a stronger one, independent of which provider is "primary" this week.
-- Add a simple fallback: if the primary provider errors or rate-limits, retry once against a configured secondary provider. This directly addresses "NIM is unreliable at peak times" without you having to manually flip a switch mid-outage.
+- Add a simple fallback: if the primary provider errors or rate-limits, try the remaining configured providers in order (one attempt each). This directly addresses "NIM is unreliable at peak times" without you having to manually flip a switch mid-outage.
 - OpenRouter specifically supports a `models: [...]` fallback array in a single request — worth using as your OpenRouter-internal fallback layer, with your own registry handling the *cross-provider* fallback (OpenRouter down entirely → try NIM/Opencode).
 - **Revisit licensing terms** per-provider before this is generating materials that are actually sold — this was already flagged for NIM in the original plan; extend that check to whichever provider ends up primary. **→ ADR-0002** (recommended).
 
@@ -288,6 +288,7 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 - [✅] Hono.js project skeleton (Node runtime)
 - [✅] AI provider API key + test call
 - [✅] PDF extraction route: parse a sample BOW PDF → structured objectives (JSON)
+- [✅] In-memory extraction result cache (per-file hash) — avoids re-running the LLM on re-uploads
 - [ ] Lesson plan generation route: prompt design + structured JSON output
 - [ ] PPTX generation: lesson plan JSON → slides via `pptxgenjs` (basic template)
 - [ ] DOCX generation: lesson plan JSON → Word doc via `docx` (npm)

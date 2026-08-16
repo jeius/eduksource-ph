@@ -16,7 +16,7 @@ Build an internal provider registry inside `apps/studio` (not a shared package �
 - A config object mapping provider name → `{ baseURL, apiKey, models }`, with `models` keyed by task type (extraction, lesson plan, summative test, image).
 - NIM and OpenRouter both expose OpenAI-compatible chat completion endpoints, so the standard `openai` npm client works against either by swapping `baseURL`/`apiKey` — no heavier SDK needed for those two.
 - Active provider selected via env var (`AI_PROVIDER`), with per-task model overrides (`AI_MODEL_LESSON_PLAN`, etc.) so provider and model choice can vary independently per task.
-- Automatic single-retry fallback to a configured secondary provider on error or rate limit, so a NIM outage at peak doesn't require manually flipping a switch mid-incident.
+- Fallback chains through every configured provider (one attempt each) on error or rate limit, so a NIM outage at peak doesn't require manually flipping a switch mid-incident.
 - OpenRouter's own `models: [...]` fallback array is used for fallback *within* OpenRouter; the registry's fallback handles the *cross-provider* case (OpenRouter itself down → try NIM/Opencode).
 
 Opencode Go's API is OpenAI chat-completions compatible (confirmed 2026-08-16) — the shared `openai` client works against it unmodified through the registry, no provider-specific adapter needed.

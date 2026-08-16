@@ -6,9 +6,9 @@ import type { BowDocument, ExtractResponse } from '../schemas/extract.js';
 
 const { windowHolder } = vi.hoisted(() => ({ windowHolder: { value: 128_000 } }));
 
-const { mockedNimChatDetailed, mockedNimVisionChat } = vi.hoisted(() => ({
-  mockedNimChatDetailed: vi.fn(),
-  mockedNimVisionChat: vi.fn(),
+const { mockedChatDetailed, mockedVisionChat } = vi.hoisted(() => ({
+  mockedChatDetailed: vi.fn(),
+  mockedVisionChat: vi.fn(),
 }));
 
 const { mockedExtractText, mockedPdfPagesToPngs, mockedTooManyPagesError } = vi.hoisted(() => ({
@@ -31,13 +31,15 @@ const { mockedExtractionCache } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('../lib/nim.js', () => ({
-  defaultModel: 'test-model',
-  get defaultContextWindow() {
+vi.mock('../lib/ai/client.js', () => ({
+  chatDetailed: mockedChatDetailed,
+  visionChat: mockedVisionChat,
+}));
+
+vi.mock('../lib/ai/providers.js', () => ({
+  get primaryContextWindow() {
     return windowHolder.value;
   },
-  nimChatDetailed: mockedNimChatDetailed,
-  nimVisionChat: mockedNimVisionChat,
 }));
 
 vi.mock('../lib/pdf.js', () => ({
@@ -91,7 +93,7 @@ function pdfForm(): FormData {
 }
 
 function mockChatOk(overrides: Partial<BowDocument> = {}): void {
-  mockedNimChatDetailed.mockResolvedValue({
+  mockedChatDetailed.mockResolvedValue({
     content: JSON.stringify({ ...validDoc, ...overrides }),
     usage: { input: 120, output: 45 },
   });
@@ -143,11 +145,11 @@ describe('POST /api/extract', () => {
     mockChatOk();
     mockedExtractText.mockResolvedValue({ text: 'short', pages: 1 });
     mockedPdfPagesToPngs.mockResolvedValue(['img1']);
-    mockedNimVisionChat.mockResolvedValue('Extracted via vision');
+    mockedVisionChat.mockResolvedValue('Extracted via vision');
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
     expect(mockedPdfPagesToPngs).toHaveBeenCalledWith(expect.any(Uint8Array), 20);
-    expect(mockedNimVisionChat).toHaveBeenCalledWith(['img1'], expect.any(String));
+    expect(mockedVisionChat).toHaveBeenCalledWith(['img1'], expect.any(String));
   });
 
   it('batches the OCR model call when many pages are rendered', async () => {
@@ -155,26 +157,26 @@ describe('POST /api/extract', () => {
     mockedExtractText.mockResolvedValue({ text: 'short', pages: 1 });
     // 6 page images => 2 batches of 5 (first 5, then the remainder)
     mockedPdfPagesToPngs.mockResolvedValue(['p1', 'p2', 'p3', 'p4', 'p5', 'p6']);
-    mockedNimVisionChat.mockResolvedValueOnce('Page 1-5 text').mockResolvedValueOnce('Page 6 text');
+    mockedVisionChat.mockResolvedValueOnce('Page 1-5 text').mockResolvedValueOnce('Page 6 text');
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    expect(mockedNimVisionChat).toHaveBeenCalledTimes(2);
-    expect(mockedNimVisionChat).toHaveBeenNthCalledWith(
+    expect(mockedVisionChat).toHaveBeenCalledTimes(2);
+    expect(mockedVisionChat).toHaveBeenNthCalledWith(
       1,
       ['p1', 'p2', 'p3', 'p4', 'p5'],
       expect.any(String)
     );
-    expect(mockedNimVisionChat).toHaveBeenNthCalledWith(2, ['p6'], expect.any(String));
+    expect(mockedVisionChat).toHaveBeenNthCalledWith(2, ['p6'], expect.any(String));
   });
 
   it('falls back to vision when unpdf throws', async () => {
     mockChatOk();
     mockedExtractText.mockRejectedValue(new Error('unpdf exploded'));
     mockedPdfPagesToPngs.mockResolvedValue(['img1']);
-    mockedNimVisionChat.mockResolvedValue('OCR text from pages');
+    mockedVisionChat.mockResolvedValue('OCR text from pages');
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    expect(mockedNimVisionChat).toHaveBeenCalled();
+    expect(mockedVisionChat).toHaveBeenCalled();
   });
 
   it('returns 413 when rendered PDF exceeds page limit', async () => {
@@ -194,25 +196,25 @@ describe('POST /api/extract', () => {
   it('returns a graceful empty document for an empty PDF', async () => {
     mockedExtractText.mockResolvedValue({ text: '', pages: 1 });
     mockedPdfPagesToPngs.mockResolvedValue([]);
-    mockedNimVisionChat.mockResolvedValue('');
+    mockedVisionChat.mockResolvedValue('');
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.terms).toEqual([]);
-    expect(mockedNimChatDetailed).not.toHaveBeenCalled();
+    expect(mockedChatDetailed).not.toHaveBeenCalled();
   });
 
   it('retries once on JSON parse failure then succeeds', async () => {
-    mockedNimChatDetailed
+    mockedChatDetailed
       .mockResolvedValueOnce({ content: 'invalid json {', usage: { input: 1, output: 1 } })
       .mockResolvedValueOnce({ content: JSON.stringify(validDoc), usage: { input: 2, output: 2 } });
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    expect(mockedNimChatDetailed).toHaveBeenCalledTimes(2);
+    expect(mockedChatDetailed).toHaveBeenCalledTimes(2);
   });
 
   it('returns 500 with raw output after retry still fails', async () => {
-    mockedNimChatDetailed
+    mockedChatDetailed
       .mockResolvedValueOnce({ content: 'invalid json {', usage: { input: 1, output: 1 } })
       .mockResolvedValueOnce({ content: 'still invalid {', usage: { input: 1, output: 1 } });
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
@@ -228,7 +230,7 @@ describe('POST /api/extract', () => {
     });
     // First (whole-doc) call truncates on the token limit — no retry; the route
     // must split by term and re-extract each section separately.
-    mockedNimChatDetailed
+    mockedChatDetailed
       .mockResolvedValueOnce({
         content: '{"learningArea":"English","trunc',
         usage: { input: 100, output: 8192 },
@@ -251,7 +253,7 @@ describe('POST /api/extract', () => {
 
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    expect(mockedNimChatDetailed).toHaveBeenCalledTimes(3);
+    expect(mockedChatDetailed).toHaveBeenCalledTimes(3);
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.terms.map((t) => t.termLabel)).toEqual(['First Term', 'Second Term']);
     expect(body.document.learningArea).toBe('English');
@@ -262,7 +264,7 @@ describe('POST /api/extract', () => {
       text: 'First Term ' + 'A'.repeat(200) + ' Second Term ' + 'B'.repeat(200),
       pages: 1,
     });
-    mockedNimChatDetailed
+    mockedChatDetailed
       .mockResolvedValueOnce({
         content: '{"learningArea":"English","trunc',
         usage: { input: 100, output: 8192 },
@@ -293,7 +295,7 @@ describe('POST /api/extract', () => {
     });
     const res2 = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res2.status).toBe(200);
-    expect(mockedNimChatDetailed).toHaveBeenCalledTimes(1);
+    expect(mockedChatDetailed).toHaveBeenCalledTimes(1);
   });
 
   it('splits by term when text exceeds the token budget', async () => {
@@ -301,7 +303,7 @@ describe('POST /api/extract', () => {
       text: 'First Term ' + 'A'.repeat(40_000) + ' Second Term ' + 'B'.repeat(40_000),
       pages: 1,
     });
-    mockedNimChatDetailed
+    mockedChatDetailed
       .mockResolvedValueOnce({
         content: JSON.stringify({ ...validDoc, learningArea: 'Math', terms: [validDoc.terms[0]] }),
         usage: { input: 100, output: 10 },
@@ -316,7 +318,7 @@ describe('POST /api/extract', () => {
       });
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    expect(mockedNimChatDetailed).toHaveBeenCalledTimes(2);
+    expect(mockedChatDetailed).toHaveBeenCalledTimes(2);
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.terms.map((t) => t.termLabel)).toEqual(['First Term', 'Second Term']);
     expect(body.document.learningArea).toBe('Math');
@@ -328,7 +330,7 @@ describe('POST /api/extract', () => {
       text: 'First Term ' + 'A'.repeat(400) + ' Second Term ' + 'B'.repeat(400),
       pages: 1,
     });
-    mockedNimChatDetailed
+    mockedChatDetailed
       .mockResolvedValueOnce({
         content: JSON.stringify({ ...validDoc, terms: [validDoc.terms[0]] }),
         usage: { input: 10, output: 5 },
@@ -343,7 +345,7 @@ describe('POST /api/extract', () => {
       });
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    expect(mockedNimChatDetailed).toHaveBeenCalledTimes(2);
+    expect(mockedChatDetailed).toHaveBeenCalledTimes(2);
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.terms.map((t) => t.termLabel)).toEqual(['First Term', 'Second Term']);
   });
@@ -354,7 +356,7 @@ describe('POST /api/extract', () => {
     mockedExtractText.mockResolvedValue({ text: 'A'.repeat(400), pages: 1 });
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    const opts = mockedNimChatDetailed.mock.calls[0]![1] as { max_completion_tokens: number };
+    const opts = mockedChatDetailed.mock.calls[0]![1] as { max_completion_tokens: number };
     expect(opts.max_completion_tokens).toBeLessThan(32_768);
     expect(opts.max_completion_tokens).toBeGreaterThan(0);
   });
@@ -364,7 +366,7 @@ describe('POST /api/extract', () => {
     mockedExtractText.mockResolvedValue({ text: 'A'.repeat(400), pages: 1 });
     const res = await app.request('/api/extract', { method: 'POST', body: pdfForm() });
     expect(res.status).toBe(200);
-    const opts = mockedNimChatDetailed.mock.calls[0]![1] as { max_completion_tokens: number };
+    const opts = mockedChatDetailed.mock.calls[0]![1] as { max_completion_tokens: number };
     expect(opts.max_completion_tokens).toBe(32_768);
   });
 
@@ -379,7 +381,7 @@ describe('POST /api/extract', () => {
       extractionNotes: null,
     };
     const validBlocks = Array.from({ length: 9 }, () => validDoc.terms[0]!.blocks[0]!);
-    mockedNimChatDetailed.mockResolvedValue({
+    mockedChatDetailed.mockResolvedValue({
       content: JSON.stringify({
         ...validDoc,
         terms: [{ ...validDoc.terms[0]!, blocks: [...validBlocks, badBlock] }],
@@ -403,7 +405,7 @@ describe('POST /api/extract', () => {
       strands: [], // violates min(1)
       extractionNotes: null,
     };
-    mockedNimChatDetailed.mockResolvedValue({
+    mockedChatDetailed.mockResolvedValue({
       content: JSON.stringify({
         ...validDoc,
         terms: [
@@ -430,7 +432,7 @@ describe('POST /api/extract', () => {
   });
 
   it('aggregates extractionNotes from blocks into the notes array', async () => {
-    mockedNimChatDetailed.mockResolvedValue({
+    mockedChatDetailed.mockResolvedValue({
       content: JSON.stringify({
         ...validDoc,
         terms: [

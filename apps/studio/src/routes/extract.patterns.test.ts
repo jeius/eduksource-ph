@@ -7,19 +7,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSilentLogger } from '../config/logger.js';
 import type { ExtractResponse } from '../schemas/extract.js';
 
-const { mockedNimChatDetailed } = vi.hoisted(() => ({
-  mockedNimChatDetailed: vi.fn(),
+const { mockedChatDetailed } = vi.hoisted(() => ({
+  mockedChatDetailed: vi.fn(),
 }));
 
 const { mockedExtractionCache } = vi.hoisted(() => ({
   mockedExtractionCache: { get: vi.fn(), set: vi.fn(), hashFile: vi.fn() },
 }));
 
-vi.mock('../lib/nim.js', () => ({
-  defaultModel: 'test-model',
-  defaultContextWindow: 128_000,
-  nimChatDetailed: mockedNimChatDetailed,
-  nimVisionChat: vi.fn().mockResolvedValue(''),
+vi.mock('../lib/ai/client.js', () => ({
+  chatDetailed: mockedChatDetailed,
+  visionChat: vi.fn().mockResolvedValue(''),
+}));
+
+vi.mock('../lib/ai/providers.js', () => ({
+  primaryContextWindow: 128_000,
 }));
 
 vi.mock('../lib/cache.js', () => ({
@@ -46,7 +48,7 @@ async function postFixture(app: Hono, name: string): Promise<Response> {
 }
 
 function mockDoc(overrides: Partial<ExtractResponse['document']> = {}): void {
-  mockedNimChatDetailed.mockResolvedValue({
+  mockedChatDetailed.mockResolvedValue({
     content: JSON.stringify({
       learningArea: 'Subject',
       gradeLevel: 'Grade 7',
@@ -77,8 +79,8 @@ describe('POST /api/extract — structural patterns', () => {
 
   it('extracts real text from the English fixture and passes it to NIM', async () => {
     await postFixture(app, 'BOW-[G7]-English.pdf');
-    expect(mockedNimChatDetailed).toHaveBeenCalledTimes(1);
-    const call = mockedNimChatDetailed.mock.calls[0]![0]! as Array<{
+    expect(mockedChatDetailed).toHaveBeenCalledTimes(1);
+    const call = mockedChatDetailed.mock.calls[0]![0]! as Array<{
       role: string;
       content: string;
     }>;
@@ -342,7 +344,7 @@ describe('POST /api/extract — structural patterns', () => {
     expect(body.document.terms[0]!.blocks[0]!.weekLabel).toBe('Linggo 1');
 
     const systemMsg = (
-      mockedNimChatDetailed.mock.calls[0]![0]! as Array<{ role: string; content: string }>
+      mockedChatDetailed.mock.calls[0]![0]! as Array<{ role: string; content: string }>
     ).find((m) => m.role === 'system');
     expect(systemMsg?.content).toContain('Kasanayang Pampagkatuto');
     // Whitespace-independent per-token asserts (the mapping phrase wraps across
@@ -380,7 +382,7 @@ describe('POST /api/extract — structural patterns', () => {
     });
     const res = await postFixture(app, 'BOW-[G10]-Values Education-Three-Term.pdf');
     expect(res.status).toBe(200);
-    const call = mockedNimChatDetailed.mock.calls[0]![0]! as Array<{
+    const call = mockedChatDetailed.mock.calls[0]![0]! as Array<{
       role: string;
       content: string;
     }>;
@@ -415,7 +417,7 @@ describe('POST /api/extract — structural patterns', () => {
     });
     const res = await postFixture(app, '[G11] Filipino.pdf');
     expect(res.status).toBe(200);
-    const call = mockedNimChatDetailed.mock.calls[0]![0]! as Array<{
+    const call = mockedChatDetailed.mock.calls[0]![0]! as Array<{
       role: string;
       content: string;
     }>;

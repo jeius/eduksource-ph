@@ -86,6 +86,10 @@ export function getPrimaryProvider(): ProviderConfig {
   return primary;
 }
 
+// The primary provider's window, read once at module load — token budgeting
+// in routes sizes against the provider actually serving the request.
+export const primaryContextWindow = getPrimaryProvider().contextWindow;
+
 const TASK_OVERRIDES: Record<TaskType, string | undefined> = {
   extraction: env.AI_MODEL_EXTRACTION,
   ocr: env.AI_MODEL_OCR,

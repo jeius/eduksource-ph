@@ -6,7 +6,7 @@ import {
   resolveModel,
   TASK_TYPES,
 } from '../lib/ai/providers.js';
-import { nimChat, nimChatStreamText } from '../lib/nim.js';
+import { chat, chatStreamText } from '../lib/ai/client.js';
 
 export function createHealthRoutes() {
   const health = new Hono();
@@ -17,7 +17,7 @@ export function createHealthRoutes() {
 
   health.get('/chat', async (c) => {
     try {
-      const reply = await nimChat([{ role: 'user', content: 'Reply with exactly: pong' }]);
+      const reply = await chat([{ role: 'user', content: 'Reply with exactly: pong' }]);
       return c.json({ status: 'ok', reply }, 200);
     } catch (err) {
       return c.json({ status: 'failed', error: (err as Error).message }, 500);
@@ -27,7 +27,7 @@ export function createHealthRoutes() {
   health.get('/chat/stream', async (c) => {
     return streamSSE(c, async (sseStream) => {
       try {
-        for await (const chunk of nimChatStreamText([
+        for await (const chunk of chatStreamText([
           { role: 'user', content: 'Write me a dad joke for developers...' },
         ])) {
           await sseStream.writeSSE({ data: chunk });

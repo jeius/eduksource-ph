@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createHealthRoutes } from './health.js';
 
-const { mockedNimChat, mockedNimChatStreamText } = vi.hoisted(() => ({
-  mockedNimChat: vi.fn(),
-  mockedNimChatStreamText: vi.fn(),
+const { mockedChat, mockedChatStreamText } = vi.hoisted(() => ({
+  mockedChat: vi.fn(),
+  mockedChatStreamText: vi.fn(),
 }));
 
-vi.mock('../lib/nim.js', () => ({
-  nimChat: mockedNimChat,
-  nimChatStreamText: mockedNimChatStreamText,
+vi.mock('../lib/ai/client.js', () => ({
+  chat: mockedChat,
+  chatStreamText: mockedChatStreamText,
 }));
 
 const { mockedGetPrimaryProvider, mockedGetConfiguredProviders, mockedResolveModel } = vi.hoisted(
@@ -39,20 +39,20 @@ describe('createHealthRoutes', () => {
   });
 
   it('returns 200 with status ok for `/chat`', async () => {
-    mockedNimChat.mockResolvedValue('pong');
+    mockedChat.mockResolvedValue('pong');
     const app = createHealthRoutes();
     const res = await app.request('/chat');
     const data = await res.json();
     expect(res.status).toBe(200);
     expect(data.status).toEqual('ok');
     expect(data.reply).toBe('pong');
-    expect(mockedNimChat).toHaveBeenCalledWith([
+    expect(mockedChat).toHaveBeenCalledWith([
       { role: 'user', content: 'Reply with exactly: pong' },
     ]);
   });
 
   it('returns 500 with status failed when the primary provider call throws', async () => {
-    mockedNimChat.mockRejectedValue(new Error('provider congestion'));
+    mockedChat.mockRejectedValue(new Error('provider congestion'));
     const app = createHealthRoutes();
     const res = await app.request('/chat');
     const data = await res.json();
@@ -62,7 +62,7 @@ describe('createHealthRoutes', () => {
   });
 
   it('returns SSE stream for `/chat/stream`', async () => {
-    mockedNimChatStreamText.mockImplementation(async function* () {
+    mockedChatStreamText.mockImplementation(async function* () {
       yield 'Why do programmers prefer dark mode?';
       yield 'Because light attracts bugs.';
     });
@@ -79,7 +79,7 @@ describe('createHealthRoutes', () => {
   });
 
   it('emits SSE error event when stream throws', async () => {
-    mockedNimChatStreamText.mockImplementation(async function* () {
+    mockedChatStreamText.mockImplementation(async function* () {
       yield '';
       throw new Error('stream failed');
     });

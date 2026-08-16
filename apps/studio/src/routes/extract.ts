@@ -1,13 +1,8 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { extractionCache } from '../lib/cache.js';
-import {
-  defaultContextWindow,
-  defaultModel,
-  type NimUsage,
-  nimChatDetailed,
-  nimVisionChat,
-} from '../lib/nim.js';
+import { type ChatUsage, chatDetailed, visionChat } from '../lib/ai/client.js';
+import { primaryContextWindow } from '../lib/ai/providers.js';
 import { extractText, pdfPagesToPngs, TooManyPagesError } from '../lib/pdf.js';
 import type { HonoSchema } from '../lib/types.js';
 import {
@@ -166,10 +161,10 @@ class ExtractionValidationError extends Error {
 
 async function extractBowDocument(
   text: string
-): Promise<{ document: BowDocument; usage: NimUsage }> {
+): Promise<{ document: BowDocument; usage: ChatUsage }> {
   const systemPrompt = buildSystemPrompt();
   const userPrompt = buildUserPrompt(text);
-  const outputBudget = Math.floor(defaultContextWindow * TOKEN_BUDGET_RATIO);
+  const outputBudget = Math.floor(primaryContextWindow * TOKEN_BUDGET_RATIO);
   // Output must never push input+output past the provider's window: cap it at
   // the window budget minus the estimated prompt, and never above the fixed
   // per-task headroom. Clamped to 1 so a tiny window can't produce 0.
@@ -178,11 +173,10 @@ async function extractBowDocument(
     Math.max(1, outputBudget - estimateTokens(systemPrompt + userPrompt))
   );
   const extractionOpts = {
-    model: defaultModel,
     max_completion_tokens: maxCompletionTokens,
   };
 
-  const first = await nimChatDetailed(
+  const first = await chatDetailed(
     [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
@@ -201,7 +195,7 @@ async function extractBowDocument(
     }
 
     const errorMsg = err instanceof Error ? err.message : 'Unknown parse error';
-    const retry = await nimChatDetailed(
+    const retry = await chatDetailed(
       [
         { role: 'system', content: systemPrompt },
         {
@@ -229,7 +223,7 @@ async function extractBowDocument(
   }
 }
 
-function mergeUsage(...usages: NimUsage[]): NimUsage {
+function mergeUsage(...usages: ChatUsage[]): ChatUsage {
   return usages.reduce(
     (acc, u) => ({ input: acc.input + u.input, output: acc.output + u.output }),
     { input: 0, output: 0 }
@@ -238,9 +232,9 @@ function mergeUsage(...usages: NimUsage[]): NimUsage {
 
 async function extractByTermSections(
   text: string
-): Promise<{ document: BowDocument; usage: NimUsage }> {
+): Promise<{ document: BowDocument; usage: ChatUsage }> {
   const sections = splitByTerm(text);
-  const usages: NimUsage[] = [];
+  const usages: ChatUsage[] = [];
   const terms: BowTerm[] = [];
   let learningArea = '';
   let gradeLevel = '';
@@ -265,9 +259,9 @@ function estimateTokens(input: string): number {
   return Math.ceil(input.length * TOKEN_ESTIMATE_FACTOR);
 }
 
-async function extractDocument(text: string): Promise<{ document: BowDocument; usage: NimUsage }> {
+async function extractDocument(text: string): Promise<{ document: BowDocument; usage: ChatUsage }> {
   const estimatedTokens = estimateTokens(text + buildSystemPrompt());
-  const maxTokens = Math.floor(defaultContextWindow * TOKEN_BUDGET_RATIO);
+  const maxTokens = Math.floor(primaryContextWindow * TOKEN_BUDGET_RATIO);
 
   if (estimatedTokens > maxTokens) {
     return extractByTermSections(text);
@@ -380,7 +374,7 @@ export function createExtractRoutes() {
         const chunks: string[] = [];
         for (let i = 0; i < pageImages.length; i += VISION_BATCH_SIZE) {
           const batch = pageImages.slice(i, i + VISION_BATCH_SIZE);
-          const batchText = await nimVisionChat(batch, prompt);
+          const batchText = await visionChat(batch, prompt);
           chunks.push(batchText);
         }
         text = chunks.join('\n\n');
@@ -412,7 +406,7 @@ export function createExtractRoutes() {
     }
 
     let document: BowDocument;
-    let usage: NimUsage;
+    let usage: ChatUsage;
     let validated: BowDocument;
     let warnings: string[];
     let notes: string[];

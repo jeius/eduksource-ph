@@ -46,3 +46,13 @@ coverage.json
 # Worktrees
 .claude/worktrees
 .dev/worktrees
+
+# Tempest
+.tempest
+.tempest-pid
+.mcp.json
+.cursor/mcp.json
+.gemini/settings.json
+.kiro/settings/mcp.json
+opencode.jsonc
+opencode.json

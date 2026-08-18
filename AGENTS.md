@@ -77,7 +77,7 @@ docs/adr/            # architecture decision records
 
 ## Project documentation
 
-Modular docs per `docs/refactor-guide.md` Step 2 — one concern per file:
+Modular docs — one concern per file:
 
 - `docs/PRD.md` — product requirements & scope
 - `docs/architecture.md` — system design, boundaries, security, data flow

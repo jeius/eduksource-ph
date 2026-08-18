@@ -51,10 +51,10 @@ I'm intentionally *not* adding a shared `packages/ai` yet — only `studio` call
                     ┌───────────┼────────────┐
                     ▼           ▼             ▼
               PDF extract   AI provider    R2 (S3 API)
-              (pdf-parse/   registry:      direct upload
-               unpdf +      NIM /          of generated
-               vision       OpenRouter /   files
-               fallback)    Opencode Go
+              (unpdf +      registry:      direct upload
+               pdfjs-dist +  NIM /          of generated
+               vision        OpenRouter /   files
+               fallback)     Opencode Go
 ```
 
 ### 2.2 Why two runtimes

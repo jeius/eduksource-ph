@@ -17,7 +17,7 @@ Source of truth for chosen languages, frameworks, libraries, and tools. If a dep
 | Validation              | Zod                                                             | shared schemas in `packages/schemas`, used client + server + by `studio`                      |
 | Auth                   | BetterAuth                                                      | shared session across store/admin/api; `studio` uses a separate internal service-auth scheme, `docs/architecture.md` §4 |
 | AI inference (studio)  | **Swappable**: NVIDIA NIM, OpenRouter, Opencode Go              | OpenAI-compatible clients behind one internal provider registry — ADR-0002, `docs/architecture.md` §3 |
-| PDF extraction (studio)| `pdf-parse` / `unpdf`, NIM/vision-model fallback for scanned PDFs |                                                                                              |
+| PDF extraction (studio)| `unpdf` + `pdfjs-dist` (legacy build), vision-model fallback for scanned PDFs (`@napi-rs/canvas` page rendering) |                                                                                              |
 | PPTX generation         | `pptxgenjs`                                                     |                                                                                                |
 | DOCX generation         | `docx` (npm)                                                    |                                                                                                |
 | Payments (primary)     | **PayMongo**                                                    | GCash, Maya, GrabPay, cards — PH-first, PH-compliant receipts (ADR-0005)                       |

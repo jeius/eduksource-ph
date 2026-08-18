@@ -3,16 +3,15 @@
 Audit this repo against our project documentation. Do not make any changes —
 this is a read-only assessment.
 
-1. Read PROJECT_PLAN.md, AGENTS.md, and every file in /docs/adr/ first.
+1. Read docs/PRD.md, docs/architecture.md, docs/tech-stack.md, docs/plan.md, docs/progress.md, AGENTS.md, and every file in /docs/adr/ first.
    Build a mental model of the intended architecture, tech stack, monorepo
    layout, and roadmap phase checklists before looking at any code.
 
 2. Walk the actual repo (apps/, packages/, config files, package.json
    dependencies) and compare it against what the docs describe. For each
    app (store, admin, api, studio, docs) and each shared package, check:
-   - Does it exist yet, and if so, does its structure match §5 (Monorepo
-     Layout) in PROJECT_PLAN.md?
-   - Does the tech stack actually in use match §4 (Tech Stack) — same
+   - Does it exist yet, and if so, does its structure match §1 (Monorepo Layout) in docs/architecture.md?
+   - Does the tech stack actually in use match docs/tech-stack.md — same
      frameworks, same libraries, not silently swapped for something else?
    - Are the "hard boundaries" in AGENTS.md actually being respected in
      code right now (e.g. does `studio` import `packages/db` anywhere?
@@ -22,7 +21,7 @@ this is a read-only assessment.
    - For each ADR (0001–0005), does the current code align with its
      Decision section? Flag anything that contradicts one, even partially.
 
-3. Cross-check against the roadmap in PROJECT_PLAN.md §11. For each phase:
+3. Cross-check against the roadmap in docs/plan.md §2. For each phase:
    - Which checklist items are actually done based on real code, not just
      marked done in the doc?
    - Is there anything built that isn't on the roadmap at all (scope creep,

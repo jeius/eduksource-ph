@@ -796,7 +796,7 @@ git commit -m "chore(studio): finalize PDF extraction route, logging, formatting
 
 ## Execution Options
 
-**Plan complete and saved to `docs/superpowers/plans/2026-08-12-pdf-extraction-route.md`. Two execution options:**
+**Plan complete and saved to `docs/plans/2026-08-12-pdf-extraction-route.md`. Two execution options:**
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 

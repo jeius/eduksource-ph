@@ -9,7 +9,7 @@ What's the situation that forces a decision? What constraints, requirements, or 
 
 ## Decision
 
-What are we doing. State it plainly, one or two sentences if possible. This is the part that gets referenced from code comments, PRs, and `PROJECT_PLAN.md`.
+What are we doing. State it plainly, one or two sentences if possible. This is the part that gets referenced from code comments, PRs, and project docs.
 
 ## Alternatives Considered
 

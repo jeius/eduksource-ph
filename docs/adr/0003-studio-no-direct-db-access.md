@@ -16,7 +16,7 @@ This matters more than it might look like at prototype scale: every downstream f
 ## Alternatives Considered
 
 - **Give `studio` direct access to `packages/db`** — rejected. Two independently-deployed services writing to the same schema without a shared transaction boundary is exactly the kind of thing that produces hard-to-debug data integrity issues, and it hands more attack surface (DB credentials) to the less mature, AI-driven part of the system.
-- **Fully async, event/queue-based decoupling** (studio publishes an event, something else consumes it and writes to Postgres) — deferred, not rejected. This is architecturally cleaner for scale but is unnecessary complexity while generation is still synchronous and low-frequency (see `PROJECT_PLAN.md` §6.3). Revisit if/when the job-based async flow is built.
+- **Fully async, event/queue-based decoupling** (studio publishes an event, something else consumes it and writes to Postgres) — deferred, not rejected. This is architecturally cleaner for scale but is unnecessary complexity while generation is still synchronous and low-frequency (see `docs/architecture.md` §2.3). Revisit if/when the job-based async flow is built.
 
 ## Consequences
 
@@ -25,5 +25,5 @@ This matters more than it might look like at prototype scale: every downstream f
 - `studio` can misbehave (bad output, crash mid-pipeline, bug in a new AI-generated feature) without any risk of directly corrupting product/order data.
 
 **Gets harder / new obligations:**
-- One extra network hop (`studio` → `api`) after generation completes, plus an internal-only endpoint on `api` that needs its own service-to-service auth (see `PROJECT_PLAN.md` §8).
+- One extra network hop (`studio` → `api`) after generation completes, plus an internal-only endpoint on `api` that needs its own service-to-service auth (see `docs/architecture.md` §4).
 - Traceability from a product back to the studio run that generated it depends on `product_versions.source` and `product_versions.studio_job_id` being populated correctly on every call — this is now a contract between the two services, not just an implementation detail.

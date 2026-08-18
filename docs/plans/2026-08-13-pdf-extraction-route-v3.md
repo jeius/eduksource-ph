@@ -8,7 +8,7 @@
 
 **Tech Stack:** Hono, Zod 4, `unpdf`, `pdfjs-dist` (legacy build), `@napi-rs/canvas` (new dep), OpenAI client, Vitest.
 
-**Spec:** `docs/superpowers/specs/2026-08-13-pdf-extraction-route-design-v3.md`
+**Spec:** `docs/specs/2026-08-13-pdf-extraction-route-design-v3.md`
 
 ## Global Constraints
 

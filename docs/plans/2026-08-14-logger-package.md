@@ -8,7 +8,7 @@
 
 **Tech Stack:** LogLayer (v9), pino (v10) + pino-pretty (v13), `@loglayer/transport-pino` (v3), `serialize-error` (v13), tsc (NodeNext ESM), vitest (v4), turbo.
 
-**Spec:** `docs/superpowers/specs/2026-08-14-logger-package-design.md`
+**Spec:** `docs/specs/2026-08-14-logger-package-design.md`
 
 ## Global Constraints
 

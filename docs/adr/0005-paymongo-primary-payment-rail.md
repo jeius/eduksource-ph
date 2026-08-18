@@ -21,7 +21,7 @@ Integrate **PayMongo** first (Phase 4 of the roadmap) as the primary checkout pa
 
 **Gets easier:**
 - Checkout matches how the target customer actually wants to pay, which matters more for conversion than almost anything else in the storefront.
-- PayMongo's PH-compliant receipts reduce the scope of the still-open BIR receipt compliance work (`PROJECT_PLAN.md` §12).
+- PayMongo's PH-compliant receipts reduce the scope of the still-open BIR receipt compliance work (`docs/plan.md` §3).
 
 **Gets harder / new obligations:**
 - Two payment integrations to build, test, and maintain — two webhook handlers, two sets of failure modes, and revenue reconciliation across both in the admin dashboard.

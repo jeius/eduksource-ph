@@ -65,6 +65,8 @@ docs/tech-stack.md   # tech stack
 docs/plan.md         # roadmap & SDLC
 docs/progress.md     # execution status
 docs/adr/            # architecture decision records
+workflows/           # operational specs of recurring loops (material pipeline, BOW monitor, email triage) — source of truth for how they run
+NOTES.md             # raw notes on the user's world, tools, channels, terminology (loop-me/grilling interview record)
 ```
 
 **Hard boundaries — do not cross these without first checking `docs/architecture.md` / relevant ADR:**
@@ -89,6 +91,8 @@ Modular docs — one concern per file:
 - `docs/plans/` + `docs/specs/` — **finalized** plans/specs, committed, source of truth for completed work
 - `docs/superpowers/plans/` + `docs/superpowers/specs/` — specs/plans exclusive to superpowers skills that agents consume (gitignored scratch, not a source of truth). A plan/spec moves to `docs/{plans,specs}` when finalized.
 - `docs/audit-checklist.md` — repo-vs-docs audit procedure
+- `workflows/` — operational specs of recurring loops (material pipeline, BOW monitor, email triage) — source of truth for how the loops run. See `docs/plan.md` roadmap phases that implement them
+- `NOTES.md` — raw interview record of the user's world, tools, channels, and terminology (loop-me/grilling); sharpen fuzzy terms to canonical ones here
 
 Update the doc for a concern when the decision changes, not just when you remember to. OpenAPI specs are generated from Zod schemas (not hand-written); CHANGELOGs are generated from Conventional Commits.
 

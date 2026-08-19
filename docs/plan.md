@@ -25,6 +25,8 @@ This gives you PR review discipline, CI safety nets, and a paper trail — witho
 
 Two tracks that mostly run independently until Phase 5, where Studio's output starts flowing into real product records.
 
+> **Workflow specs:** `workflows/*.md` are the source of truth for the three operational loops — `material-pipeline` (BOW → published products, checkpoint in admin), `bow-monitor` (daily DepEd change detection + import), `email-triage` (Gmail poll, auto-reply, admin checkpoint). Phases below implement them; don't let implementation drift from the loop specs.
+
 ### Phase 0 — Planning ✅
 
 - [✅] This document set (PRD, architecture, tech-stack, plan)
@@ -86,8 +88,9 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 
 - [ ] Product CRUD, publish/draft workflow, versioning
 - [ ] Order/sales dashboard, coupon management, refunds, feedback queue
-- [ ] `admin` UI: upload BOW PDF → trigger Studio job → review draft → approve/publish
+- [ ] `admin` UI: upload BOW PDF → trigger Studio job → review draft → approve/publish — **implement the checkpoint brief + approve/reject/manual-fix routing from `workflows/material-pipeline.md`** (whole-import checkpoint session, per-product rows, price override at publish)
 - [ ] Studio → R2 direct upload + `api` `POST /internal/products` call (`docs/architecture.md` §2.3) wired end-to-end
+- [ ] **BOW update monitor** per `workflows/bow-monitor.md`: daily 6am poll of DepEd source(s), SHA-256 hash-compare vs `bow_documents` (ADR-0007), import changed PDF into studio + hand affected entries to the pipeline
 - [ ] Finalize Studio Node hosting choice (`docs/architecture.md` §2.4) and deploy
 - [ ] **Revisit AI provider licensing terms** for whichever provider is primary at this point (`docs/architecture.md` §3)
 
@@ -96,6 +99,7 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 ### Phase 6 — Communication (Track A)
 
 - [ ] Resend + react-email templates: order confirmation, download-ready, receipt, admin notifications
+- [ ] **Email triage** per `workflows/email-triage.md`: Gmail API OAuth poll (~5 min) → classify (FAQ/order question, support/refund, notification, spam) → auto-reply FAQs via Resend from verified domain, checkpoint the rest in admin with drafted replies
 
 ### Phase 7 — Docs app (Tracks A + B)
 

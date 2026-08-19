@@ -14,6 +14,7 @@ You're solo, so full Scrum/ceremonies would just add overhead. What's actually u
 - **Trunk-based development:** `main` always deployable. Short-lived branches per task, PR per branch even solo — gives you a review checkpoint, a rollback point, and a changelog for free. Squash-merge.
 - **Definition of Done = Exit Criteria.** Keep this pattern for every phase below — a concrete, testable end state per phase.
 - **Conventional Commits** (`feat:`, `fix:`, `chore:`, etc.) → enables auto-generated CHANGELOGs later with zero extra effort.
+- **API-first for `api`:** define the route surface as Zod schemas + `@hono/zod-openapi`-annotated stub handlers before writing real handler logic. `store`/`admin` can then build against the generated OpenAPI types and mocked responses (`@anatine/zod-mock` or `msw`) while backend logic gets filled in incrementally, route by route. The contract lives in the same Zod schema that defines the implementation's types, not a hand-maintained spec file — so it can't silently drift the way traditional API-first tooling often does. Applies to new route surfaces going forward (see Phase 2 below); don't retrofit routes that already have real logic just to match the ordering.
 - **CI (GitHub Actions):** typecheck + lint (Biome) + unit tests (Vitest) on every PR. Playwright e2e (checkout flow, studio pipeline) gated before merging to `main`.
 - **CD:** preview deployments per branch for `store`/`admin`/`docs` (Cloudflare Pages does this natively); a staging Workers environment for `api`; a staging instance for `studio` on whatever Node host you land on (`docs/architecture.md` §2.4). Promote to production via a tagged release.
 - **Weekly self-check-in:** `docs/progress.md` — mainly so context isn't lost between sessions, since you're the only continuity the project has.
@@ -56,7 +57,7 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 **Track A**
 
 - [ ] BetterAuth wired into `api`, shared session across `store`/`admin`
-- [ ] Hono API core routes scaffolded (products, cart, orders) with Zod validation on every input
+- [ ] API-first pass on `api`'s core surface: Zod schemas + OpenAPI-annotated stub routes for products, cart, and orders (the full Phase 3/4 surface) — `store`/`admin` can start building against generated types and mocked responses immediately; real handler logic fills in incrementally after
 
 **Track B**
 
@@ -66,7 +67,7 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 - [ ] Error handling/retries around AI calls (rate limits, timeouts, cross-provider fallback per `docs/architecture.md` §3)
 - [ ] Add job-based flow if generation time makes blocking requests impractical
 
-**Exit criteria:** Studio output is consistently good enough for an editor to approve with minor edits, not rewrite from scratch. Auth is real, not a placeholder.
+**Exit criteria:** Studio output is consistently good enough for an editor to approve with minor edits, not rewrite from scratch. Auth is real, not a placeholder. `api`'s core surface has a stable, reviewable contract before its handlers are fully built out.
 
 ### Phase 3 — Storefront core (Track A)
 

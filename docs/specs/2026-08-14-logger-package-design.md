@@ -30,8 +30,8 @@ Rationale:
 ```
 packages/logger/
   package.json          # name @eduksource/logger, exports ./src/index.ts, runtime deps
-  tsconfig.json         # extends @eduksource/config/typescript/node.json, outDir dist
-  biome.json            # extends @eduksource/config/biome/base.json
+  tsconfig.json         # extends @eduksource/config/ts/node, outDir dist
+  biome.json            # extends ./node_modules/@eduksource/config/src/biome/base.json
   vitest.config.ts      # extends @eduksource/config/vitest
   src/
     index.ts            # public exports

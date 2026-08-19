@@ -1,4 +1,4 @@
 {
   "root": false,
-  "extends": ["./node_modules/@eduksource/config/biome/base.json"]
+  "extends": ["./node_modules/@eduksource/config/src/biome/base.json"]
 }

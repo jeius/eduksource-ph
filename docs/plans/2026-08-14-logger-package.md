@@ -93,7 +93,7 @@
 
 ```json
 {
-  "extends": "./node_modules/@eduksource/config/typescript/node.json",
+  "extends": "@eduksource/config/ts/node",
   "compilerOptions": {
     "target": "ESNext",
     "strict": true,
@@ -129,7 +129,7 @@
 ```json
 {
   "root": false,
-  "extends": ["./node_modules/@eduksource/config/biome/base.json"]
+  "extends": ["./node_modules/@eduksource/config/src/biome/base.json"]
 }
 ```
 

@@ -142,3 +142,15 @@ If you (the agent) are about to make a call that would be annoying to reverse la
 ## Migrating from CLAUDE.md
 
 This file replaces `CLAUDE.md`. If `CLAUDE.md` still exists in the repo, it's stale — delete it rather than maintaining both.
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Multi-context layout: root `CONTEXT-MAP.md` points to per-context `CONTEXT.md` files. See `docs/agents/domain.md`.

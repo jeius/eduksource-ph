@@ -109,6 +109,10 @@ Update the doc for a concern when the decision changes, not just when you rememb
 | [0003](docs/adr/0003-studio-no-direct-db-access.md) | `studio` has no Postgres access; goes through `api`'s internal endpoint | anything that looks like "just give studio a DB connection for convenience" |
 | [0004](docs/adr/0004-supabase-temporary-db.md) | Supabase as the (explicitly temporary) Postgres host | changing `packages/db`'s connection setup or evaluating DB hosting |
 | [0005](docs/adr/0005-paymongo-primary-payment-rail.md) | PayMongo primary / Stripe secondary payment rails | touching checkout, payment webhooks, or currency handling |
+| [0006](docs/adr/0006-slide-content-chained-off-lesson-plan.md) | Slide content generated from the lesson plan, not the raw BOW | touching `studio`'s slide generation flow or where slide content comes from |
+| [0007](docs/adr/0007-bow-extractions-durable-content-hash.md) | BOW extractions are durable, `api`-owned records keyed by content hash | changing `studio`'s extraction identity/persistence or `bow_documents` |
+| [0008](docs/adr/0008-bow-extraction-normalized-text-hash.md) | BOW extraction identity = normalized-text hash, with a catalog safety net | touching `studio`'s extraction identity, cache reuse, or re-download reuse |
+| [0009](docs/adr/0009-search-service-microservices-vehicle.md) | Search service (`apps/search`) as the microservices vehicle | adding another microservice, message broker, or IPC work in this repo |
 
 This table needs to stay in sync — add a row here whenever a new ADR is written (see below).
 

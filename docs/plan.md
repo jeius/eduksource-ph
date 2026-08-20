@@ -121,6 +121,19 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 
 Only pursued if the project gains traction and users actually request self-serve generation. Requires its own mini-PRD when triggered: per-user auth on `studio`, rate limiting, a credits/billing model, abuse prevention, and almost certainly the async job flow rather than synchronous. Not scoped further now — deliberately.
 
+### Phase 10 — Search service (per ADR-0009)
+
+`apps/search` (Node, hosted like `studio`) as the deliberate microservices vehicle: Meilisearch/Typesense read-model index, RabbitMQ for catalog events, gRPC for store queries routed through `api`. Graceful degradation to Postgres full-text when search is unreachable.
+
+- [ ] Search design spec (`docs/specs/`): event schema, gRPC contract, bootstrap endpoint shape — prerequisite before implementation
+- [ ] RabbitMQ hosting choice (managed tier, e.g. CloudAMQP, vs self-hosted)
+- [ ] `api` event bus (`shared/events/bus.ts`, per the modular-monolith spec §5) + catalog `events.ts` — `product.published`/`updated`/`archived`
+- [ ] `api` bootstrap endpoint: `GET /internal/products?full=true` (catalog module, service-token auth)
+- [ ] `apps/search` service: index bootstrap, RabbitMQ consumer, gRPC query surface
+- [ ] `store` search wired through `api` with Postgres-FTS fallback
+
+**Exit criteria:** a published product appears in store search via Meilisearch/Typesense; killing the search service degrades store search to Postgres FTS, not broken.
+
 ## 3. Risks & Open Questions
 
 | Risk / Question | Notes |
@@ -131,7 +144,7 @@ Only pursued if the project gains traction and users actually request self-serve
 | Generated content accuracy (curriculum alignment) | Human review by editor remains mandatory before anything is sold — not fire-and-forget |
 | Studio Node hosting | Resolved: Fly.io (region `sin`, auto-stop scale-to-zero). Revisit if cost scales |
 | Supabase marked temporary | Decide long-term DB hosting before scaling |
-| Search engine upgrade (Meilisearch/Typesense) | Revisit once catalog size is known |
+| Search engine upgrade (Meilisearch/Typesense) | Resolved 2026-08-18 — pulled forward as Phase 10 (ADR-0009), not a wait-and-see upgrade |
 | BIR receipt compliance | Needs research before launch |
 | Download/license limits | Decide whether re-downloads are unlimited or capped, and enforcement approach |
 

@@ -101,7 +101,8 @@ _To be filled as the interview surfaces terms._
 ## Grounded repo facts (read from code/ADRs)
 
 - Repo is early-stage: only `apps/studio` exists (extraction routes, AI provider registry, pdf/cache libs). No api/admin/store/email packages yet — specs build against planned infra + ADRs.
-- ADR-0007: `bow_documents` (api-owned, Postgres) keyed by SHA-256 content hash; extraction JSON + PDF in R2; studio reads/writes via `GET`/`POST /internal/bow-documents` with internal-service token; two-tier cache (session memory + api record); `school_year` required at upload.
+- ADR-0007: `bow_documents` (api-owned, Postgres) — durable extraction records; extraction JSON + PDF in R2; studio reads/writes via `GET`/`POST /internal/bow-documents` with internal-service token; two-tier cache (session memory + api record); `school_year` required at upload.
+- ADR-0008: BOW identity = SHA-256 of **normalized extracted text** (not raw PDF bytes) + catalog safety net (same grade/learning-area/school-year under a different hash → non-blocking reuse prompt). Partially supersedes ADR-0007's identity mechanism.
 - ADR-0002: AI calls through provider registry, swappable via config.
 - ADR-0003: studio has no direct Postgres access; api is sole DB owner.
 - ADR-0001: studio runs on Node, separate from Workers.

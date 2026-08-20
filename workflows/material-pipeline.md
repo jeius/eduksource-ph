@@ -24,9 +24,10 @@ Take a Budget of Work (BOW) PDF and turn it into published store products: one b
 
 ## Steps
 
-1. **Import & identify.** PDF arrives in studio. Compute SHA-256 content hash. Look up `GET /internal/bow-documents` by hash (ADR-0007).
+1. **Identify.** PDF arrives in studio. Extract text cheaply (no AI: `unpdf`/`pdfjs-dist`), normalize per ADR-0008 (strip repeated header/footer lines, collapse whitespace, drop page-number tokens), hash — that hash is the identity. Look up `GET /internal/bow-documents` by it (ADR-0007/0008).
    - Hit → reuse the stored extraction (session cache first, then api record).
-   - Miss → run extraction (studio pipeline, provider via registry per ADR-0002) → `POST /internal/bow-documents` (record + R2 blobs; `school_year` supplied at upload time per ADR-0007).
+   - Miss → safety net: a record exists for the same grade level / learning area / school year under a different hash → raise a non-blocking admin card: "we already have an extraction for this grade/subject/year — reuse it or continue as new?" The pipeline proceeds as new; the editor can flip to reuse from the card.
+   - Then run full extraction (vision-model fallback only when text extraction is thin, provider via registry per ADR-0002) → `POST /internal/bow-documents` (record + R2 blobs; `school_year` supplied at upload time per ADR-0007).
 2. **Parse entries.** Split the extraction into BOW entries (grade level, learning area, quarter/week, learning competencies).
 3. **Generate.** For each entry, generate the full artifact set: bundle artifacts + 4 singles (lesson plan, slides, exam, worksheet). Auto-generate a cover image from metadata (title, subject, grade). All AI calls go through the provider registry (ADR-0002).
 4. **Check.** Run the 3 checks per product: (1) BOW competency alignment, (2) factual/content correctness, (3) formatting. Record pass/fail per check plus risk flags. Persist via `api` internal endpoints (same pattern as `/internal/products`).
@@ -59,10 +60,10 @@ Speed of review is imperative: a full entry card is decidable in under a minute.
 ## Error handling
 
 - Entry generation failure → mark the row failed, route to manual fix (`.scratch/` task) with the error attached. Never silently skip an entry.
-- API/persistence failure mid-run → abort the run, log via `@eduksource/logger`, surface an alert card in the admin checkpoint. Safe to re-run from the import step (hash makes extraction idempotent).
+- API/persistence failure mid-run → abort the run, log via `@eduksource/logger`, surface an alert card in the admin checkpoint. Safe to re-run from the identify step (normalized-text hash makes extraction idempotent).
 
 ## References
 
-- ADR-0001 (runtime split), ADR-0002 (provider registry), ADR-0003 (api sole DB owner), ADR-0007 (BOW extraction durability + hash).
+- ADR-0001 (runtime split), ADR-0002 (provider registry), ADR-0003 (api sole DB owner), ADR-0007 (BOW extraction durability), ADR-0008 (identity: normalized-text hash + catalog safety net).
 - `apps/studio` extraction routes, `apps/studio/src/lib/ai/` provider registry (existing).
 - Planned: `apps/api` internal endpoints (`/internal/bow-documents`, `/internal/products`), `apps/admin` review surface.

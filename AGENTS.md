@@ -112,21 +112,22 @@ Update the doc for a concern when the decision changes, not just when you rememb
 
 ## Architecture Decision Records — check before touching these areas
 
-`/docs/adr/` holds the reasoning behind decisions that are expensive to reverse. Before working in an area listed below, open the linked ADR — don't rediscover (or accidentally undo) reasoning that's already been settled.
+`/docs/adr/` holds repo-wide decisions; per-package ADRs live in `apps/<x>/docs/adr/` or `packages/<x>/docs/adr/`. Before working in an area listed below, open the linked ADR — don't rediscover (or accidentally undo) reasoning that's already been settled.
 
-| ADR | Governs | Check before... |
-| ------------------------------------------------ | ------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| [0001](docs/adr/0001-two-runtime-split.md) | Workers (platform) vs. Node (`studio`) runtime split | touching `studio`'s deployment, hosting, or "why isn't this on Workers" |
-| [0002](docs/adr/0002-swappable-ai-provider-registry.md) | AI provider registry — NIM/OpenRouter/Opencode Go, swappable by config | adding/changing any AI call inside `studio` |
-| [0003](docs/adr/0003-studio-no-direct-db-access.md) | `studio` has no Postgres access; goes through `api`'s internal endpoint | anything that looks like "just give studio a DB connection for convenience" |
-| [0004](docs/adr/0004-supabase-temporary-db.md) | Supabase as the (explicitly temporary) Postgres host | changing `packages/db`'s connection setup or evaluating DB hosting |
-| [0005](docs/adr/0005-paymongo-primary-payment-rail.md) | PayMongo primary / Stripe secondary payment rails | touching checkout, payment webhooks, or currency handling |
-| [0006](docs/adr/0006-slide-content-chained-off-lesson-plan.md) | Slide content generated from the lesson plan, not the raw BOW | touching `studio`'s slide generation flow or where slide content comes from |
-| [0007](docs/adr/0007-bow-extractions-durable-content-hash.md) | BOW extractions are durable, `api`-owned records keyed by content hash | changing `studio`'s extraction identity/persistence or `bow_documents` |
-| [0008](docs/adr/0008-bow-extraction-normalized-text-hash.md) | BOW extraction identity = normalized-text hash, with a catalog safety net | touching `studio`'s extraction identity, cache reuse, or re-download reuse |
-| [0009](docs/adr/0009-search-service-microservices-vehicle.md) | Search service (`apps/search`) as the microservices vehicle | adding another microservice, message broker, or IPC work in this repo |
+| ADR | Governs | Location | Check before... |
+| --- | --- | --- | --- |
+| [0001](docs/adr/0001-two-runtime-split.md) | Workers (platform) vs. Node (studio) runtime split | `docs/adr/` | touching studio's deployment, hosting, or "why isn't this on Workers" |
+| [0002](apps/studio/docs/adr/0002-swappable-ai-provider-registry.md) | AI provider registry — NIM/OpenRouter/Opencode, swappable by config | `apps/studio/docs/adr/` | adding/changing any AI call inside studio |
+| [0003](apps/studio/docs/adr/0003-studio-no-direct-db-access.md) | studio has no Postgres access; goes through api's internal endpoint | `apps/studio/docs/adr/` | anything that looks like "just give studio a DB connection for convenience" |
+| [0004](docs/adr/0004-supabase-temporary-db.md) | Supabase as the (explicitly temporary) Postgres host | `docs/adr/` (→ `packages/db/docs/adr/` when db lands) | changing `packages/db`'s connection setup or evaluating DB hosting |
+| [0005](docs/adr/0005-paymongo-primary-payment-rail.md) | PayMongo primary / Stripe secondary payment rails | `docs/adr/` | touching checkout, payment webhooks, or currency handling |
+| [0006](apps/studio/docs/adr/0006-slide-content-chained-off-lesson-plan.md) | Slide content generated from the lesson plan, not the raw BOW | `apps/studio/docs/adr/` | touching studio's slide generation flow or where slide content comes from |
+| [0007](apps/studio/docs/adr/0007-bow-extractions-durable-content-hash.md) | BOW extractions are durable, api-owned records keyed by content hash | `apps/studio/docs/adr/` | changing studio's extraction identity/persistence or `bow_documents` |
+| [0008](apps/studio/docs/adr/0008-bow-extraction-normalized-text-hash.md) | BOW extraction identity = normalized-text hash, with catalog safety net | `apps/studio/docs/adr/` | touching studio's extraction identity, cache reuse, or re-download reuse |
+| [0009](docs/adr/0009-search-service-microservices-vehicle.md) | Search service (`apps/search`) as the microservices vehicle | `docs/adr/` | adding another microservice, message broker, or IPC work in this repo |
+| [0010](docs/adr/0010-per-package-docs-locality-adr-split-tsconfig-dedup.md) | Per-package docs locality, ADR location split, tsconfig dedup | `docs/adr/` | adding a package, relocating an ADR, or changing the shared tsconfig |
 
-This table needs to stay in sync — add a row here whenever a new ADR is written (see below).
+This table needs to stay in sync — add a row here whenever a new ADR is written anywhere (root or per-package), with its Location. See ADR-0010.
 
 ---
 

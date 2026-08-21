@@ -2,10 +2,11 @@
 
 ## Contexts
 
-- [API](./apps/api/CONTEXT.md): marketplace backend — catalog, cart, orders, checkout, licenses, coupons, reviews, feedback, BOW documents
-- `apps/studio`: AI generation pipeline (Node, admin/editor-only) — context file not written yet
-- `apps/store`, `apps/admin`, `apps/docs`, `apps/search`: planned or early-stage — context files not written yet
-- `packages/db`: shared Drizzle schema, owned by `api`
+- [API](./apps/api/CONTEXT.md): marketplace backend — catalog, cart, orders, checkout, licenses, coupons, reviews, feedback, BOW Documents
+- [Studio](./apps/studio/CONTEXT.md): AI generation pipeline (Node, admin/editor-only) — extraction, provider registry, lesson plan, slide generation
+- `apps/store`, `apps/admin`, `apps/docs`, `apps/search`: planned — context files land when code lands (ADR-0010)
+- `packages/db`: shared Drizzle schema, owned by `api` — CONTEXT.md lands when package lands
+- `packages/config`, `packages/logger`: infra — no CONTEXT.md (no domain terms, ADR-0010)
 
 ## Relationships
 

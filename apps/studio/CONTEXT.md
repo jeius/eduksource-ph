@@ -9,7 +9,7 @@ The structured output of parsing a BOW PDF (objectives JSON).
 _Avoid_: parse result, BOW cache entry
 
 **Extraction identity**:
-The durable identifier for an extraction — normalized-text hash (ADR-0008) with a catalog safety net; studio computes it, api persists it as a durable record (ADR-0007).
+The durable identifier for an extraction — normalized-text hash (ADR-0008) with a catalog safety net; derived inside Studio from markdown/text (currently `unpdf`/`pdfjs-dist`+vision; designed for BOW Parsing `markdown` when parked service revives), then persisted by API as a durable record (ADR-0007). Studio is the sole producer of the hash (Q3).
 _Avoid_: cache key, content hash (the hash is the computation, not the concept)
 
 **Provider registry**:
@@ -27,3 +27,7 @@ _Avoid_: model role
 **BOW Document**:
 A durable extraction record for a Budget of Work PDF (ADR-0007/0008), owned by the bow-documents module in api. Studio produces the extraction that becomes one.
 _Avoid_: extraction record, BOW cache entry
+
+**BOW Parsing** *(parked external context)*:
+The `apps/extraction` *design* for parsing a BOW PDF to markdown (docling.rs, Q2=c) — parked 2026-08-22; Studio does not call it, uses in-process `unpdf`/`pdfjs-dist`+vision. See [BOW Parsing Context](../extraction/CONTEXT.md) (parked record).
+_Avoid_: extraction service, docling service

@@ -13,6 +13,7 @@ apps/
   api/          # Hono on Cloudflare Workers — sole owner of Postgres writes
   studio/       # Hono on Node — AI generation pipeline, admin/editor-only for now
   docs/         # Tanstack Start or static docs site
+  # extraction/ — Parked design (BOW Parsing, docling.rs via gRPC, ADR-0011) — not built, unpdf stays primary
 packages/
   ui/           # shared shadcn-ui components
   db/           # drizzle schema + migrations — used ONLY by api
@@ -24,6 +25,8 @@ packages/
 ```
 
 **Note:** `studio` deliberately does **not** depend on `packages/db`. It talks to Postgres only indirectly, through `api`'s endpoints (§2.3). This keeps `api` as the single gatekeeper for product data, which matters once you have buyers whose access depends on that data being correct.
+
+`extraction` (BOW Parsing, ADR-0011) was designed the same way — never touch Postgres, return markdown to `studio` over gRPC — but is parked (2026-08-22, docling table failure) so `studio`'s current path is in-process `unpdf`/`pdfjs-dist`+vision.
 
 I'm intentionally *not* adding a shared `packages/ai` yet — only `studio` calls AI providers right now, so that logic lives inside `apps/studio`. Promote it to a shared package only if a second app needs it (e.g. if `admin` ever calls AI directly for something unrelated to Studio).
 
@@ -57,14 +60,19 @@ I'm intentionally *not* adding a shared `packages/ai` yet — only `studio` call
                fallback)     Opencode Go
 ```
 
+> BOW Parsing (`apps/extraction`, docling.rs via gRPC, ADR-0011) — parked 2026-08-22 after high-fidelity table failure; would have sat between `studio` and the PDF extract step with circuit breaker + `/healthz`, but `studio` currently uses in-process `unpdf`/`pdfjs-dist` directly.
+
 ### 2.2 Why two runtimes
 
 `api`, `store`, `admin`, `docs` all run on Cloudflare Workers — cheap, fast cold starts, tightly integrated with R2/Queues. `studio` cannot: PDF parsing, PPTX/DOCX assembly, and multi-step LLM calls need Node's memory/CPU headroom and native module support that Workers' 128MB/CPU-time limits don't give you. **→ ADR-0001** (indexed in AGENTS.md).
+
+`extraction` (BOW Parsing, ADR-0011) also would have run on Node (`docling.rs` ONNX) for isolation, but is parked — `studio`'s current `unpdf` path stays in-process.
 
 ### 2.3 Studio ↔ API data flow
 
 1. Editor uploads a BOW PDF in `admin` → `admin` calls `studio` with an internal service token (§4).
 2. `studio` runs the pipeline: extract → lesson plan (AI) → PPTX/DOCX assembly → summative/term exam (AI).
+   - **Extract step:** `studio` runs `unpdf`/`pdfjs-dist`+vision in-process, normalizes text and derives `contentHash` (ADR-0008) itself. The BOW Parsing gRPC path (`apps/extraction`, `Header`+`PdfChunk` → `ExtractionResult`, circuit breaker, ADR-0011) is parked — `docling.rs` failed high-fidelity tables, so no `EXTRACTION_SERVICE_TOKEN` hop exists today.
 3. `studio` uploads all output files **directly to R2** via the S3-compatible API (`@aws-sdk/client-s3` pointed at R2's endpoint, R2 access-key credentials — separate from `api`'s native Workers R2 binding).
 4. `studio` returns (or the `admin` app receives) the resulting R2 object keys + generation metadata (which AI provider/model was used, extracted objectives, etc.).
 5. `admin` calls `api`'s `POST /internal/products` (or similar) with those R2 keys to create a **draft** product record + `product_versions` row. `api` is the only thing that ever writes to Postgres.
@@ -77,6 +85,8 @@ This keeps the "api is sole DB gatekeeper" property intact while letting `studio
 ### 2.4 Deployment target (resolved)
 
 `studio` runs on **Fly.io** (`apps/studio/fly.toml`, region `sin`) — chosen from the Fly.io / Cloud Run / Render candidates for its auto-stop machines, which give scale-to-zero without idle bills. Revisit only if cost or cold-start behavior changes at Phase 5+ scale.
+
+`extraction` was designed for Fly.io alongside `studio`/`search` but is parked (ADR-0011, Q1 gate triggered — docling spike failed); no `apps/extraction/fly.toml` to maintain. Model-cache bake/volume decision moot while parked.
 
 ## 3. AI Provider Strategy (Studio)
 
@@ -114,6 +124,7 @@ const providers: Record<string, ProviderConfig> = {
 | `admin` ↔ `studio` | **Internal service token** (shared secret, env-configured) — `studio` is not exposed to the public internet; only `admin` (and later `api`, if the callback flow needs it) holds the token |
 | `studio` ↔ R2 | R2 API token (Account ID + Access Key ID + Secret) scoped to the studio-outputs bucket/prefix only |
 | Downloads (customers) | Signed, expiring R2 URLs only — never public bucket links |
+| `studio` ↔ `extraction` (BOW Parsing) | *Parked* — was `EXTRACTION_SERVICE_TOKEN` + gRPC `ExtractBow`/`HealthCheck` + HTTP `/healthz` (ADR-0011), not built after docling table failure |
 
 This is deliberately the simplest thing that works while Studio is admin/editor-only. **When/if public Studio access ships** (see `docs/PRD.md` §3), this needs to be replaced with real per-user auth + rate limiting + likely a credits/billing system — flagging now so it's not a surprise later, but not building it now.
 
@@ -125,4 +136,3 @@ Existing tables carry over unchanged (`users`, `products`, `product_versions`, `
 - `product_versions.studio_job_id` — nullable reference, for traceability back to which generation run produced this file (provider/model used, extracted BOW metadata) — useful once you're debugging "why does this lesson plan look off."
 
 Studio's own job/run bookkeeping (status, timestamps, which provider/model, error messages) stays **inside `studio`** (in-memory or a lightweight local store) rather than in the shared Postgres — it only hands `api` the final, approved-for-review result. Keeps `api`'s schema from absorbing internal pipeline noise.
-

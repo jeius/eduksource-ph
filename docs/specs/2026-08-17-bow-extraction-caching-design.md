@@ -17,8 +17,8 @@ The original version of this spec keyed identity off a raw SHA-256 of the upload
 
 **Revised identity: hash the normalized extracted text, not the raw PDF bytes.**
 
-1. Run the cheap, non-AI text extraction (`unpdf`/`pdfjs-dist`) first — always, regardless of cache status, since it's fast and doesn't touch a paid AI call.
-2. **Normalize** the extracted text before hashing: strip repeated header/footer lines (detectable — they're the lines that repeat near-verbatim across pages, e.g. a school's address block appearing once per page), collapse whitespace, drop page-number-like tokens.
+1. Obtain markdown/text for the PDF — via in-process `unpdf`/`pdfjs-dist` (cheap, no AI call). BOW Parsing `apps/extraction` (`ExtractBow` gRPC, ADR-0011) would have been an alternative primary with Studio still deriving the hash (Q3), but is parked after `docling.rs` table failure — so this step is `unpdf` only while parked.
+2. **Normalize** the text inside Studio before hashing: strip repeated header/footer lines (detectable — they're the lines that repeat near-verbatim across pages, e.g. a school's address block appearing once per page), collapse whitespace, drop page-number-like tokens. Studio is the sole producer of `contentHash` (Q3).
 3. Hash the normalized text. This becomes `contentHash`.
 
 This directly addresses the concrete drift pattern real BOW documents exhibit — repaginated exports, minor tooling-version differences, and per-page repeated letterhead blocks all wash out under normalization even though they'd change a raw byte hash every time.
@@ -80,7 +80,7 @@ type ExtractResponseWithId = ExtractResponse & {
 
 **Flow on a call to `/extract`:**
 
-1. Studio runs text extraction first (always — cheap, no AI call), then computes `contentHash` from the **normalized** text (§2).
+1. Studio runs `unpdf`/`pdfjs-dist`+vision in-process (and normalizes the text to compute `contentHash` per §2, Q3). BOW Parsing gRPC path (`ExtractBow` `Header`+`PdfChunk`, breaker `GET /health/extraction`, `PARTIAL`→warnings) is parked — not tried — so this step is direct `unpdf` only while parked.
 2. Studio checks **L1** (in-memory) for `contentHash`. Hit → return immediately.
 3. Miss → Studio calls `api`'s `GET /internal/bow-documents?contentHash=...`.
    - **Hit:** fetch the `ExtractResponse` from R2 via `extraction_json_key`, populate L1, return it. **The extraction pipeline — including any vision-model fallback — never runs.** This is the real cost/latency win.

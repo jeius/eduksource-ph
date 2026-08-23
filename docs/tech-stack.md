@@ -10,6 +10,7 @@ Source of truth for chosen languages, frameworks, libraries, and tools. If a dep
 | API framework          | Hono                                                            | used by **both** `api` (Workers) and `studio` (Node) — same framework, two runtimes           |
 | Compute (store/admin/api/docs) | Cloudflare Workers                                    |                                                                                                |
 | Compute (studio)       | **Node**, separate host (Fly.io, `docs/architecture.md` §2.4)  | Workers' 128MB memory cap + CPU limits are a poor fit for PDF/PPTX/DOCX assembly              |
+| Compute (extraction/BOW Parsing) | *Parked* — would have been Node/Fly.io (`apps/extraction`) for `docling.rs` ONNX | Parked 2026-08-22 after high-fidelity table failure; `unpdf` stays primary (ADR-0011) |
 | File storage           | Cloudflare R2                                                   | signed/expiring URLs only; `api` uses native R2 binding, `studio` uses R2's S3-compatible API |
 | Background jobs        | Cloudflare Queues                                               | watermarking, preview generation, email sending, webhook processing (platform side)           |
 | Database               | Supabase (Postgres)                                             | temporary; migrate path TBD (ADR-0004)                                                        |
@@ -17,7 +18,9 @@ Source of truth for chosen languages, frameworks, libraries, and tools. If a dep
 | Validation              | Zod                                                             | shared schemas in `packages/schemas`, used client + server + by `studio`                      |
 | Auth                   | BetterAuth                                                      | shared session across store/admin/api; `studio` uses a separate internal service-auth scheme, `docs/architecture.md` §4 |
 | AI inference (studio)  | **Swappable**: NVIDIA NIM, OpenRouter, Opencode Go              | OpenAI-compatible clients behind one internal provider registry — ADR-0002, `docs/architecture.md` §3 |
-| PDF extraction (studio)| `unpdf` + `pdfjs-dist` (legacy build), vision-model fallback for scanned PDFs (`@napi-rs/canvas` page rendering) |                                                                                              |
+| PDF extraction (studio) | `unpdf` + `pdfjs-dist`, vision-model fallback for scanned PDFs (`@napi-rs/canvas` page rendering) | Primary path; BOW Parsing `docling.rs` via `apps/extraction` (gRPC `Header`+`PdfChunk`, `opossum` breaker) parked 2026-08-22 after high-fidelity table failure — design kept as `docs/specs/2026-08-20-extraction-service-design.md` (ADR-0011) |
+| IPC (studio↔extraction) | *Parked* — would have been gRPC `@grpc/grpc-js` + `ts-proto` (header-first client-streaming, HTTP `/healthz` for `models_loaded` gate) | Parked with BOW Parsing (ADR-0011); Workers-native gRPC (ADR-0009 for `search`) unrelated |
+| Resilience (studio) | *Parked* — would have been circuit breaker `opossum` (5/60s defaults) | Parked with BOW Parsing; current fallback is unconditional `unpdf` path, not stateful breaker |
 | PPTX generation         | `pptxgenjs`                                                     |                                                                                                |
 | DOCX generation         | `docx` (npm)                                                    |                                                                                                |
 | Payments (primary)     | **PayMongo**                                                    | GCash, Maya, GrabPay, cards — PH-first, PH-compliant receipts (ADR-0005)                       |

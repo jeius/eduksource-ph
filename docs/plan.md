@@ -121,9 +121,11 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 
 Only pursued if the project gains traction and users actually request self-serve generation. Requires its own mini-PRD when triggered: per-user auth on `studio`, rate limiting, a credits/billing model, abuse prevention, and almost certainly the async job flow rather than synchronous. Not scoped further now — deliberately.
 
-### Phase 10 — Search service (per ADR-0009)
+### Phase 10 — Search as microservices vehicle (ADR-0009) + BOW Parsing — parked (ADR-0011)
 
-`apps/search` (Node, hosted like `studio`) as the deliberate microservices vehicle: Meilisearch/Typesense read-model index, RabbitMQ for catalog events, gRPC for store queries routed through `api`. Graceful degradation to Postgres full-text when search is unreachable.
+`apps/search` (Node, hosted like `studio`) is the deliberate microservices vehicle: Meilisearch/Typesense read-model index, RabbitMQ for catalog events, gRPC for store queries routed through `api`. Graceful degradation to Postgres full-text when search is unreachable. BOW Parsing (`apps/extraction`, `docling.rs` via gRPC) is **parked** — see below.
+
+**Search** (`apps/search`, Node, hosted like `studio`):
 
 - [ ] Search design spec (`docs/specs/`): event schema, gRPC contract, bootstrap endpoint shape — prerequisite before implementation
 - [ ] RabbitMQ hosting choice (managed tier, e.g. CloudAMQP, vs self-hosted)
@@ -132,7 +134,19 @@ Only pursued if the project gains traction and users actually request self-serve
 - [ ] `apps/search` service: index bootstrap, RabbitMQ consumer, gRPC query surface
 - [ ] `store` search wired through `api` with Postgres-FTS fallback
 
-**Exit criteria:** a published product appears in store search via Meilisearch/Typesense; killing the search service degrades store search to Postgres FTS, not broken.
+**Exit criteria (search):** a published product appears in store search via Meilisearch/Typesense; killing the search service degrades store search to Postgres FTS, not broken.
+
+**BOW Parsing** (`apps/extraction`, Node/Fly.io, ADR-0011, spec `docs/specs/2026-08-20-extraction-service-design.md`) — **Parked 2026-08-22**: `docling.rs` spike failed high-fidelity BOW table structure (Q12); `unpdf`+`pdfjs-dist`+vision stays primary. Design kept as record (`apps/extraction/CONTEXT.md`, spec Parked). Revisit only with a different library spike per Q13 (b). Items below not built:
+
+- [ ] *Parked* — Verify `DOCLING_RS_CACHE_DIR` (spec §8, moot while parked)
+- [ ] *Parked* — `docling.rs` evaluation spike (failed)
+- [ ] *Parked* — Proto `extraction.proto`: `Header`+`PdfChunk` stream, `HealthCheck`+`/healthz`
+- [ ] *Parked* — `apps/extraction` service + Fly `fly.toml` + baked models
+- [ ] *Parked* — `apps/studio` gRPC client + `EXTRACTION_SERVICE_TOKEN` + `opossum` `GET /health/extraction`
+
+**Exit criteria (BOW Parsing — parked, not active):** none while parked; if revived, would be: BOW PDF streamed to `extraction` returns `markdown`; killing `extraction` falls back to `unpdf` with no regression.
+
+**Revisit gate (Q1) triggered 2026-08-22:** `docling.rs` spike failed — collapsed back to in-process `unpdf` path, no fourth service. Don't carry for its own sake.
 
 ## 3. Risks & Open Questions
 

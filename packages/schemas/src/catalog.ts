@@ -1,7 +1,11 @@
 import { z } from 'zod';
 
 export const CatalogCreateSchema = z.object({
-  slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^[a-z0-9-]+$/),
   title: z.string().min(1).max(500),
   description: z.string().max(5000).optional(),
   gradeLevel: z.string().min(1).max(50),

@@ -56,3 +56,4 @@ coverage.json
 .kiro/settings/mcp.json
 opencode.jsonc
 opencode.json
+.worktrees/

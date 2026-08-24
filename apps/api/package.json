@@ -12,9 +12,9 @@
     "build": "tsc --project tsconfig.build.json",
     "start": "wrangler dev",
     "check-types": "tsc --noEmit",
-    "lint": "pnpx @biomejs/biome lint",
-    "format": "pnpx @biomejs/biome format",
-    "fix": "pnpx @biomejs/biome check --write .",
+    "lint": "biome lint",
+    "format": "biome format",
+    "fix": "biome check --write .",
     "test": "vitest run"
   },
   "dependencies": {

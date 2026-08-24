@@ -13,6 +13,7 @@ export async function listProducts(db: DrizzleDB, filters: CatalogFilters) {
   if (filters.subject) conditions.push(eq(products.subject, filters.subject));
   if (filters.term) conditions.push(eq(products.term, filters.term));
   if (filters.status) conditions.push(eq(products.status, filters.status));
+  else conditions.push(eq(products.status, 'published')); // default: hide drafts from non-admin callers
 
   const rows = await db
     .select()
@@ -30,29 +31,32 @@ export async function getProductById(db: DrizzleDB, id: number) {
 }
 
 export async function createProduct(db: DrizzleDB, input: CatalogCreateInput) {
-  const [product] = await db
-    .insert(products)
-    .values({
-      slug: input.slug,
-      title: input.title,
-      description: input.description,
-      gradeLevel: input.gradeLevel,
-      subject: input.subject,
-      term: input.term,
-      status: input.status ?? 'draft',
-    })
-    .returning();
-  if (!product) throw AppError.conflict('Failed to create product');
-  const [version] = await db
-    .insert(productVersions)
-    .values({
-      productId: product.id,
-      version: 1,
-      source: 'studio_generated',
-      r2Key: input.r2Key,
-      versionNote: input.versionNote,
-    })
-    .returning();
-  if (!version) throw AppError.conflict('Failed to create product version');
+  const { product, version } = await db.transaction(async (tx) => {
+    const [product] = await tx
+      .insert(products)
+      .values({
+        slug: input.slug,
+        title: input.title,
+        description: input.description,
+        gradeLevel: input.gradeLevel,
+        subject: input.subject,
+        term: input.term,
+        status: input.status ?? 'draft',
+      })
+      .returning();
+    if (!product) throw AppError.conflict('Failed to create product');
+    const [version] = await tx
+      .insert(productVersions)
+      .values({
+        productId: product.id,
+        version: 1,
+        source: 'studio_generated',
+        r2Key: input.r2Key,
+        versionNote: input.versionNote,
+      })
+      .returning();
+    if (!version) throw AppError.conflict('Failed to create product version');
+    return { product, version };
+  });
   return { product, version };
 }

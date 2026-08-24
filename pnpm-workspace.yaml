@@ -3,5 +3,5 @@ packages:
   - "packages/*"
 allowBuilds:
   esbuild: true
-  workerd: set this to true or false
+  workerd: true
 injectWorkspacePackages: true

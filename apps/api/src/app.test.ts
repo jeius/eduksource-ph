@@ -53,11 +53,7 @@ describe('app', () => {
 
   it('POST /internal/products returns 401 without X-Internal-Token', async () => {
     const app = createApiApp(env);
-    const res = await app.request(
-      '/internal/products',
-      { method: 'POST' },
-      env
-    );
+    const res = await app.request('/internal/products', { method: 'POST' }, env);
     expect(res.status).toBe(401);
   });
 });

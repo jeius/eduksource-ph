@@ -20,8 +20,10 @@ describe('catalog', () => {
   it('GET /products returns 200 with products array', async () => {
     const res = await app.request('/products', {}, env);
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { products: unknown[] };
+    const body = (await res.json()) as { products: { status: string }[] };
     expect(Array.isArray(body.products)).toBe(true);
+    // Draft-leak guard: default listing only exposes published products
+    for (const p of body.products) expect(p.status).toBe('published');
   });
 
   it('GET /products validates query params -> 422 on bad limit', async () => {

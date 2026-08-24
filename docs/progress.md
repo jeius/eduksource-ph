@@ -15,7 +15,7 @@ Phase 1 — Foundation (`docs/plan.md` §2). Track B (Studio) in progress; Track
   - Monorepo scaffold (Turborepo + pnpm, Biome, shared tsconfig)
   - Supabase + Drizzle: `packages/db` schema + single migration history applied to Supabase (ADR-0004)
   - API foundation on Cloudflare Workers: Hono app with env validation (`DATABASE_URI`, `INTERNAL_SERVICE_TOKEN` ≥32 chars), health route, shared errors/logger/auth middleware
-  - Catalog module (Phase 2): `GET /products` (filters + cursor pagination), `GET /products/:id`, `POST /internal/products` (service-token auth, 401/409/422) — OpenAPI generated from Zod via `@hono/zod-openapi`
+  - Catalog module (Phase 2): `GET /products` (filters + limit pagination), `GET /products/:id`, `POST /internal/products` (service-token auth, 401/409/422) — OpenAPI generated from Zod via `@hono/zod-openapi`
   - bow-documents module: `GET/POST /internal/bow-documents` durable cache keyed by 64-hex content hash (ADR-0007), R2 key-only storage
   - `GET /openapi.json`; verified `GET /health` 200 without DB and `/internal/*` 401 without token (tests run against real Supabase via `app.request()` — no `wrangler dev` needed)
   - `.dev.vars.example` with `INTERNAL_SERVICE_TOKEN` placeholder

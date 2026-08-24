@@ -2,7 +2,10 @@
   "name": "@eduksource/db",
   "private": true,
   "type": "module",
-  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./schema": { "types": "./dist/schema/index.d.ts", "default": "./dist/schema/index.js" }
+  },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "check-types": "tsc --noEmit",

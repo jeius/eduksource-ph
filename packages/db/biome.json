@@ -1,0 +1,7 @@
+{
+  "root": false,
+  "extends": ["../../packages/config/src/biome/base.json"],
+  "files": {
+    "includes": ["!!drizzle", "!!dist"]
+  }
+}

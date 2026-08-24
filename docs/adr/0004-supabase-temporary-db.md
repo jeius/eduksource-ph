@@ -3,6 +3,8 @@
 **Status:** Accepted (temporary — explicitly flagged for revisit)
 **Date:** 2026-08-14 *(decision predates this ADR — part of the original v1 project plan; documented retroactively)*
 
+**Note:** This ADR is `packages/db`-owned. It relocates to `packages/db/docs/adr/0004-supabase-temporary-db.md` when `packages/db` lands (lazy per-app docs policy, ADR-0010).
+
 ## Context
 
 The project needed a managed Postgres instance to start building against without taking on database ops work at prototype stage. Supabase offers hosted Postgres with a generous free tier and fast setup, which unblocks development immediately. It was marked "temporary" in the plan from day one — the intent was never to treat this as a permanent infrastructure decision, just to not let database hosting choice block getting `api` and the schema built.

@@ -1,11 +1,6 @@
 {
   "extends": "@eduksource/config/ts/node",
   "compilerOptions": {
-    "target": "ESNext",
-    "strict": true,
-    "verbatimModuleSyntax": true,
-    "skipLibCheck": true,
-    "types": ["node"],
     "rootDir": "src",
     "outDir": "dist"
   },

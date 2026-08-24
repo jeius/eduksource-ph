@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": ["DRY_RUN", "WORKTREES_DIR", "DATABASE_URI"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -10,8 +11,11 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
+    "format": {
+      "dependsOn": ["^format"]
+    },
     "fix": {
-      "cache": false
+      "dependsOn": ["^fix"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]

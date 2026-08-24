@@ -6,6 +6,7 @@
       "!!**/dist",
       "!!**/build",
       "!!**/.claude",
+      "!!**/.opencode",
       "!!**/.agents",
       "!!**/.dev",
       "!!**/node_modules"

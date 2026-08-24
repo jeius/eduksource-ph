@@ -15,6 +15,10 @@ node_modules
 !.env.*.example
 !*/.env.example
 !*/.env.*.example
+.dev.vars
+*/.dev.vars
+!.dev.vars.example
+!*/.dev.vars.example
 
 # Testing
 coverage
@@ -56,3 +60,4 @@ coverage.json
 .kiro/settings/mcp.json
 opencode.jsonc
 opencode.json
+.worktrees/

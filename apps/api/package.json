@@ -1,0 +1,38 @@
+{
+  "name": "@eduksource/api",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Julius Pahama <https://www.linkedin.com/in/julius-pahama>",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "tsc --project tsconfig.build.json",
+    "start": "wrangler dev",
+    "check-types": "tsc --noEmit",
+    "lint": "biome lint",
+    "format": "biome format",
+    "fix": "biome check --write .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eduksource/db": "workspace:*",
+    "@eduksource/schemas": "workspace:*",
+    "@hono/zod-openapi": "^1.6.1",
+    "drizzle-orm": "^0.44.7",
+    "hono": "^4.13.1",
+    "http-status": "^2.1.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7",
+    "@cloudflare/workers-types": "^4.20250824.0",
+    "@eduksource/config": "workspace:*",
+    "@types/node": "^26.1.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.38.0"
+  }
+}

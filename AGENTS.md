@@ -2,7 +2,7 @@
 
 Instructions for any coding agent (Claude Code, opencode, or otherwise) working in this repo. This file is intentionally tool-agnostic — no assumptions about which agent is reading it.
 
-> Scope lives in `docs/PRD.md`, architecture in `docs/architecture.md`, roadmap in `docs/plan.md`, execution status in `docs/progress.md`. Read them before starting work. Individual architectural decisions and their reasoning live in `/docs/adr/`.
+> Scope lives in `docs/PRD.md`, architecture in `docs/architecture.md`, roadmap in `docs/plan.md`, execution status in `docs/progress.md`. Per-package rules live in `apps/<x>/AGENTS.md` or `packages/<x>/AGENTS.md`. See "Where to read first" below.
 
 ---
 
@@ -46,36 +46,48 @@ pnpm test:e2e                         # Playwright — checkout flow + Studio pi
 
 ```txt
 apps/
-  store/        # Tanstack Start — public storefront
-  admin/        # Tanstack Start — admin/editor dashboard
-  api/          # Hono on Cloudflare Workers — sole owner of Postgres writes
-  studio/       # Hono on Node — AI generation pipeline, admin/editor-only
-  docs/         # (later) Tanstack Start — renders the modular docs, ADRs, OpenAPI specs
+  <name>/            # canonical app layout (built: api, studio — others planned)
+    AGENTS.md        # package-specific engineering rules + tool contracts
+    CONTEXT.md       # domain glossary (if the app has domain terms)
+    docs/adr/        # package-specific ADRs
+    src/
 packages/
-  ui/           # shared shadcn-ui components
-  db/           # drizzle schema + migrations — used ONLY by api
-  auth/         # betterAuth config, shared across api/store/admin
-  email/        # resend templates (react-email)
-  logger/       # shared logger to use instead of console.log
-  schemas/      # shared zod schemas
-  config/       # shared tsconfig, biome config
-docs/PRD.md          # product requirements & scope
-docs/architecture.md # system design & boundaries
-docs/tech-stack.md   # tech stack
-docs/plan.md         # roadmap & SDLC
-docs/progress.md     # execution status
-docs/adr/            # architecture decision records
-workflows/           # operational specs of recurring loops (material pipeline, BOW monitor, email triage) — source of truth for how they run
-NOTES.md             # raw notes on the user's world, tools, channels, terminology (loop-me/grilling interview record)
+  <name>/            # canonical package layout (built: config, logger — others planned)
+    AGENTS.md        # package-specific contract (minimal for infra packages)
+    CONTEXT.md       # only if domain terms accrue (config/logger skip)
+    docs/adr/        # package-specific ADRs (lazy)
+    src/
+docs/                # repo-wide: PRD, architecture, tech-stack, plan, progress, adr (repo-wide),
+                     #   libraries, models, plans, specs, superpowers, audit-checklist, agents
+workflows/           # operational specs of recurring loops (material pipeline, BOW monitor, email triage)
+NOTES.md             # raw interview record
+CONTEXT-MAP.md       # points at per-context CONTEXT.md files
 ```
+
+> Per-package `AGENTS.md` / `CONTEXT.md` / `docs/adr/` land the day code lands, not before (ADR-0010). Planned: `packages/{db,auth,email,schemas,ui}`, `apps/{store,admin,docs,search}`. Rules that will move when each lands: db-import lock → `packages/db/AGENTS.md`; BetterAuth config contract → `packages/auth/AGENTS.md`; shared Zod schemas contract → `packages/schemas/AGENTS.md`.
 
 **Hard boundaries — do not cross these without first checking `docs/architecture.md` / relevant ADR:**
 
-- `packages/db` (Drizzle schema, Postgres access) is imported by `api` only. `studio` does **not** get a Postgres connection — it uploads generated files directly to R2 and calls `api`'s endpoints to persist product metadata. See ADR-0001 and `docs/architecture.md` §2.3.
-- `studio` runs on Node, not Cloudflare Workers, and is deployed separately from the other apps. Don't "simplify" it onto Workers — see ADR-0001 for why that doesn't work (memory/CPU limits, native modules).
-- `admin` ↔ `studio` auth is a separate internal service token, not the BetterAuth session used elsewhere. Don't assume BetterAuth session cookies are available inside `studio`.
-- AI provider calls inside `studio` go through the provider registry (`apps/studio/src/lib/ai/`), not direct hardcoded client calls to a specific provider. See ADR-0002 — provider/model choice is meant to be swappable via config, not hardcoded per call site.
+- `packages/db` (Drizzle schema, Postgres access) is imported by `api` only. See ADR-0001 and `docs/architecture.md` §2.3. Studio-specific no-DB, runtime, provider-registry, and service-token rules live in `apps/studio/AGENTS.md`.
 - Downloads are always signed, expiring R2 URLs. Never generate or hardcode a public bucket link.
+
+## Where to read first
+
+| Concern | Where |
+|---|---|
+| What the product is & why | `docs/PRD.md` |
+| System design & boundaries | `docs/architecture.md` |
+| Tech stack | `docs/tech-stack.md` |
+| Roadmap & phased plan | `docs/plan.md` |
+| Execution status | `docs/progress.md` |
+| Repo-wide locked decisions | `docs/adr/` |
+| A package's engineering rules + tool contracts | `apps/<x>/AGENTS.md` or `packages/<x>/AGENTS.md` |
+| A package's domain vocabulary | `apps/<x>/CONTEXT.md` (or `packages/<x>/CONTEXT.md` where it exists) |
+| Package-specific locked decisions | `apps/<x>/docs/adr/` |
+| How to track work | `docs/agents/issue-tracker.md` |
+| Recurring-loop operational specs | `workflows/` |
+
+---
 
 ## Project documentation
 
@@ -100,21 +112,22 @@ Update the doc for a concern when the decision changes, not just when you rememb
 
 ## Architecture Decision Records — check before touching these areas
 
-`/docs/adr/` holds the reasoning behind decisions that are expensive to reverse. Before working in an area listed below, open the linked ADR — don't rediscover (or accidentally undo) reasoning that's already been settled.
+`/docs/adr/` holds repo-wide decisions; per-package ADRs live in `apps/<x>/docs/adr/` or `packages/<x>/docs/adr/`. Before working in an area listed below, open the linked ADR — don't rediscover (or accidentally undo) reasoning that's already been settled.
 
-| ADR | Governs | Check before... |
-| ------------------------------------------------ | ------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| [0001](docs/adr/0001-two-runtime-split.md) | Workers (platform) vs. Node (`studio`) runtime split | touching `studio`'s deployment, hosting, or "why isn't this on Workers" |
-| [0002](docs/adr/0002-swappable-ai-provider-registry.md) | AI provider registry — NIM/OpenRouter/Opencode Go, swappable by config | adding/changing any AI call inside `studio` |
-| [0003](docs/adr/0003-studio-no-direct-db-access.md) | `studio` has no Postgres access; goes through `api`'s internal endpoint | anything that looks like "just give studio a DB connection for convenience" |
-| [0004](docs/adr/0004-supabase-temporary-db.md) | Supabase as the (explicitly temporary) Postgres host | changing `packages/db`'s connection setup or evaluating DB hosting |
-| [0005](docs/adr/0005-paymongo-primary-payment-rail.md) | PayMongo primary / Stripe secondary payment rails | touching checkout, payment webhooks, or currency handling |
-| [0006](docs/adr/0006-slide-content-chained-off-lesson-plan.md) | Slide content generated from the lesson plan, not the raw BOW | touching `studio`'s slide generation flow or where slide content comes from |
-| [0007](docs/adr/0007-bow-extractions-durable-content-hash.md) | BOW extractions are durable, `api`-owned records keyed by content hash | changing `studio`'s extraction identity/persistence or `bow_documents` |
-| [0008](docs/adr/0008-bow-extraction-normalized-text-hash.md) | BOW extraction identity = normalized-text hash, with a catalog safety net | touching `studio`'s extraction identity, cache reuse, or re-download reuse |
-| [0009](docs/adr/0009-search-service-microservices-vehicle.md) | Search service (`apps/search`) as the microservices vehicle | adding another microservice, message broker, or IPC work in this repo |
+| ADR | Governs | Location | Check before... |
+| --- | --- | --- | --- |
+| [0001](docs/adr/0001-two-runtime-split.md) | Workers (platform) vs. Node (studio) runtime split | `docs/adr/` | touching studio's deployment, hosting, or "why isn't this on Workers" |
+| [0002](apps/studio/docs/adr/0002-swappable-ai-provider-registry.md) | AI provider registry — NIM/OpenRouter/Opencode, swappable by config | `apps/studio/docs/adr/` | adding/changing any AI call inside studio |
+| [0003](apps/studio/docs/adr/0003-studio-no-direct-db-access.md) | studio has no Postgres access; goes through api's internal endpoint | `apps/studio/docs/adr/` | anything that looks like "just give studio a DB connection for convenience" |
+| [0004](docs/adr/0004-supabase-temporary-db.md) | Supabase as the (explicitly temporary) Postgres host | `docs/adr/` (→ `packages/db/docs/adr/` when db lands) | changing `packages/db`'s connection setup or evaluating DB hosting |
+| [0005](docs/adr/0005-paymongo-primary-payment-rail.md) | PayMongo primary / Stripe secondary payment rails | `docs/adr/` | touching checkout, payment webhooks, or currency handling |
+| [0006](apps/studio/docs/adr/0006-slide-content-chained-off-lesson-plan.md) | Slide content generated from the lesson plan, not the raw BOW | `apps/studio/docs/adr/` | touching studio's slide generation flow or where slide content comes from |
+| [0007](apps/studio/docs/adr/0007-bow-extractions-durable-content-hash.md) | BOW extractions are durable, api-owned records keyed by content hash | `apps/studio/docs/adr/` | changing studio's extraction identity/persistence or `bow_documents` |
+| [0008](apps/studio/docs/adr/0008-bow-extraction-normalized-text-hash.md) | BOW extraction identity = normalized-text hash, with catalog safety net | `apps/studio/docs/adr/` | touching studio's extraction identity, cache reuse, or re-download reuse |
+| [0009](docs/adr/0009-search-service-microservices-vehicle.md) | Search service (`apps/search`) as the microservices vehicle | `docs/adr/` | adding another microservice, message broker, or IPC work in this repo |
+| [0010](docs/adr/0010-per-package-docs-locality-adr-split-tsconfig-dedup.md) | Per-package docs locality, ADR location split, tsconfig dedup | `docs/adr/` | adding a package, relocating an ADR, or changing the shared tsconfig |
 
-This table needs to stay in sync — add a row here whenever a new ADR is written (see below).
+This table needs to stay in sync — add a row here whenever a new ADR is written anywhere (root or per-package), with its Location. See ADR-0010.
 
 ---
 
@@ -140,12 +153,6 @@ If you (the agent) are about to make a call that would be annoying to reverse la
 - Anything touching AI provider licensing terms ("production use" definitions per NIM/OpenRouter/Opencode Go) — flag before assuming it's fine, especially once Studio output is actually being sold. See ADR-0002.
 - Anything that would expose `studio` or admin-only `api` routes publicly (e.g. while building the `docs` app's API reference) — Studio is explicitly admin/editor-only for now; public self-serve access is a deferred future feature (`docs/PRD.md` §3), not something to build toward by default.
 - Secrets, API keys, or credentials — never hardcode or commit them, even temporarily "to test." Use the existing env var pattern.
-
----
-
-## Migrating from CLAUDE.md
-
-This file replaces `CLAUDE.md`. If `CLAUDE.md` still exists in the repo, it's stale — delete it rather than maintaining both.
 
 ---
 

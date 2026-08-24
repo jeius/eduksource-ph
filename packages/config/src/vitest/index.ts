@@ -1,5 +1,5 @@
-export { baseConfig } from "./base-config.js";
-export { uiConfig } from "./ui-config.js";
+export { baseConfig } from './base-config.js';
+export { uiConfig } from './ui-config.js';
 
 export const sharedConfig = {
   test: {

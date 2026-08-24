@@ -1,5 +1,5 @@
-import { sharedConfig } from '@eduksource/config/vitest'
-import { defineConfig } from 'vitest/config'
+import { sharedConfig } from '@eduksource/config/vitest';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   ...sharedConfig,
@@ -24,4 +24,4 @@ export default defineConfig({
       },
     ],
   },
-})
+});

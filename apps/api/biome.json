@@ -1,0 +1,30 @@
+{
+  "root": false,
+  "extends": ["./node_modules/@eduksource/config/src/biome/base.json"],
+  "overrides": [
+    {
+      "includes": ["src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/modules/*/service.ts"],
+                    "message": "Use port.ts via index.ts"
+                  },
+                  {
+                    "group": ["**/modules/*/internal-routes.ts"],
+                    "message": "Mounted only by app.ts"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

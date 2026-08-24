@@ -20,6 +20,15 @@ Single Cloudflare Worker. Owns all Postgres writes, organized into modules along
 
 Auth is not a module — cross-cutting middleware every module uses.
 
+## Lint-enforced module boundaries
+
+`biome.json` sets `noRestrictedImports` (error) over `src/**`:
+
+- `**/modules/*/service.ts` → "Use port.ts via index.ts" (no other module imports a service directly).
+- `**/modules/*/internal-routes.ts` → "Mounted only by app.ts" (internal routes are mounted solely in `app.ts`).
+
+These guard AGENTS.md module-boundary rules 2–3. The denylist is a forward-looking guard for Tasks 4/5; it does not block current files.
+
 ## DB ownership (ADR-0003, ADR-0004)
 
 - api is sole Postgres gatekeeper. studio/search go through `/internal/*` (service token). See ADR-0003.

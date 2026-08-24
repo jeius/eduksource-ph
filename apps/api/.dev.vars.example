@@ -1,0 +1,3 @@
+DATABASE_URI=postgres://user:***@host:5432/db?sslmode=require
+INTERNAL_SERVICE_TOKEN=replace-with-openssl-rand-hex-32-min-32-chars
+LOG_LEVEL=info

@@ -19,6 +19,9 @@
   },
   "dependencies": {
     "@eduksource/db": "workspace:*",
+    "@eduksource/schemas": "workspace:*",
+    "@hono/zod-openapi": "^1.6.1",
+    "drizzle-orm": "^0.44.7",
     "hono": "^4.13.1",
     "http-status": "^2.1.0",
     "zod": "^4.4.3"

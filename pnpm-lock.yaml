@@ -162,6 +162,9 @@ importers:
         specifier: ^3.4.5
         version: 3.4.9
     devDependencies:
+      '@biomejs/biome':
+        specifier: 2.5.7
+        version: 2.5.7
       '@eduksource/config':
         specifier: workspace:*
         version: link:../config

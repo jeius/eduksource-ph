@@ -1,0 +1,23 @@
+{
+  "name": "@eduksource/db",
+  "private": true,
+  "type": "module",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "check-types": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.0",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@eduksource/config": "workspace:*",
+    "@types/node": "^26.2.0",
+    "drizzle-kit": "^0.31.0",
+    "typescript": "^6.0.3"
+  }
+}

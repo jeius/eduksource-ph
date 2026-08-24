@@ -45,7 +45,9 @@ pnpm-debug.log*
 coverage.json
 
 # Superpowers
-*/superpowers
+.superpowers/
+.scratch/
+docs/superpowers/
 
 # Worktrees
 .claude/worktrees

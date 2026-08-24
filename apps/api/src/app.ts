@@ -29,10 +29,6 @@ export function createApiApp(rawEnv: Record<string, unknown>) {
   app.route('/', catalogRoutes);
   app.route('/', catalogInternalRoutes);
   app.route('/', bowInternalRoutes);
-  app.doc('/openapi.json', {
-    openapi: '3.0.0',
-    info: { title: 'EdukSource API', version: '1.0.0' },
-  });
   app.onError(errorHandler);
   return app;
 }

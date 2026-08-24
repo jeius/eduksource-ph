@@ -1,6 +1,7 @@
 import { createDb } from '@eduksource/db';
 import { Hono } from 'hono';
 import { parseEnv } from './config/env.js';
+import { internalRoutes as bowInternalRoutes } from './modules/bow-documents/index.js';
 import {
   internalRoutes as catalogInternalRoutes,
   routes as catalogRoutes,
@@ -20,6 +21,7 @@ export function createApiApp(rawEnv: Record<string, unknown>) {
   app.get('/health', (c) => c.json({ ok: true }));
   app.route('/', catalogRoutes);
   app.route('/', catalogInternalRoutes);
+  app.route('/', bowInternalRoutes);
   app.onError(errorHandler);
   return app;
 }

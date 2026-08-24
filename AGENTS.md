@@ -100,11 +100,13 @@ Modular docs — one concern per file:
 - `docs/progress.md` — current execution status, next steps
 - `docs/adr/` — ADRs (individual decisions)
 - `docs/libraries/`, `docs/models/` — library/model notes
-- `docs/plans/` + `docs/specs/` — **finalized** plans/specs, committed, source of truth for completed work
-- `docs/superpowers/plans/` + `docs/superpowers/specs/` — specs/plans exclusive to superpowers skills that agents consume (gitignored scratch, not a source of truth). A plan/spec moves to `docs/{plans,specs}` when finalized.
+- `docs/plans/` + `docs/specs/` — **finalized** plans/specs, committed, source of truth for completed work. A plan/spec is promoted here **before** SDD so SDD reads the committed plan on `main`.
+- `docs/superpowers/plans/` + `docs/superpowers/specs/` — scratch, gitignored. `superpowers:writing-plans` writes here first; review, then `cp` to `docs/plans/`|`docs/specs/` before SDD.
 - `docs/audit-checklist.md` — repo-vs-docs audit procedure
 - `workflows/` — operational specs of recurring loops (material pipeline, BOW monitor, email triage) — source of truth for how the loops run. See `docs/plan.md` roadmap phases that implement them
 - `NOTES.md` — raw interview record of the user's world, tools, channels, and terminology (loop-me/grilling); sharpen fuzzy terms to canonical ones here
+
+**Delivery flow (per phase/feature):** `grill → .scratch/spec.md → docs/specs/ (finalize) → GitHub issue → docs/superpowers/plans/ (scratch plan) → docs/plans/ (promote before SDD) → SDD → Verify (lint/types/test) → PR → Squash Merge` — per `docs/plan.md` §1 trunk-based.
 
 Update the doc for a concern when the decision changes, not just when you remember to. OpenAPI specs are generated from Zod schemas (not hand-written); CHANGELOGs are generated from Conventional Commits.
 

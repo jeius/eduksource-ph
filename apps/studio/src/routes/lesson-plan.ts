@@ -1,7 +1,7 @@
+import { LessonPlanResponseSchema } from '@eduksource/schemas/lesson-plan.js';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { LessonPlanResponseSchema } from '@eduksource/schemas/lesson-plan.js';
 import type { ChatDetailedResult, ChatMessage, ChatOptions } from '../lib/ai/client.js';
 import { chatDetailed } from '../lib/ai/client.js';
 import { primaryContextWindow } from '../lib/ai/providers.js';
@@ -362,8 +362,7 @@ export function createLessonPlanRoutes() {
           },
         });
       } catch (firstErr) {
-        const validationMsg =
-          firstErr instanceof Error ? firstErr.message : String(firstErr);
+        const validationMsg = firstErr instanceof Error ? firstErr.message : String(firstErr);
         retried = true;
         const retryMessages: ChatMessage[] = [
           { role: 'system', content: systemPrompt },
@@ -389,8 +388,7 @@ export function createLessonPlanRoutes() {
           return c.json(
             {
               error: 'Lesson plan generation failed validation after retry',
-              validationErrors:
-                secondErr instanceof Error ? secondErr.message : String(secondErr),
+              validationErrors: secondErr instanceof Error ? secondErr.message : String(secondErr),
               raw: (second.content ?? '').slice(0, 8192),
               provider: providerUsed,
               model: modelUsed,

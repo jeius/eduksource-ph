@@ -178,34 +178,118 @@ const validLessonPlan = {
       learningCompetency: 'Examine sense of self',
     },
     sessions: [
-      { sessionLabel: 'Session 1', learningObjectives: ['identify stages', 'describe characteristics', 'reflect on importance'], learnerContext: 'aware but need specifics - visual learners' },
-      { sessionLabel: 'Session 2', learningObjectives: ['explain Super exploration', 'demonstrate mapping', 'reflect on uncertainties'], learnerContext: 'G11 exploring careers, needs career relevance' },
-      { sessionLabel: 'Session 3', learningObjectives: ['analyze dilemmas', 'perform skits', 'demonstrate empathy'], learnerContext: 'real scenarios help see protective factors' },
-      { sessionLabel: 'Session 4', learningObjectives: ['articulate Erikson-Super link', 'create vision statements', 'express aspirations'], learnerContext: 'vision board fosters self-awareness' },
+      {
+        sessionLabel: 'Session 1',
+        learningObjectives: [
+          'identify stages',
+          'describe characteristics',
+          'reflect on importance',
+        ],
+        learnerContext: 'aware but need specifics - visual learners',
+      },
+      {
+        sessionLabel: 'Session 2',
+        learningObjectives: [
+          'explain Super exploration',
+          'demonstrate mapping',
+          'reflect on uncertainties',
+        ],
+        learnerContext: 'G11 exploring careers, needs career relevance',
+      },
+      {
+        sessionLabel: 'Session 3',
+        learningObjectives: ['analyze dilemmas', 'perform skits', 'demonstrate empathy'],
+        learnerContext: 'real scenarios help see protective factors',
+      },
+      {
+        sessionLabel: 'Session 4',
+        learningObjectives: [
+          'articulate Erikson-Super link',
+          'create vision statements',
+          'express aspirations',
+        ],
+        learnerContext: 'vision board fosters self-awareness',
+      },
     ],
   },
   learningExperience: {
     sessions: [
-      { sessionLabel: 'Session 1', preLesson: 'Greetings & Recall', flow: 'Teacher presents objectives → wellness check → How well do you know yourself? … peer sharing 2 min… guided discussion … inclusion …'.repeat(2), learningResources: ['Powerpoint', 'Pictures'], opportunitiesForIntegration: 'Social Studies: cultural influences' },
-      { sessionLabel: 'Session 2', preLesson: 'Peer Interview', flow: 'Teacher explains Super Exploration … Life Rainbow chart … wellness on tentative choices …', learningResources: ['Materials'], opportunitiesForIntegration: 'N/A' },
-      { sessionLabel: 'Session 3', preLesson: 'Picture Analysis', flow: 'Teacher reviews Erikson vs Super … Scenario Analysis groups … Discussion Qs …', learningResources: ['Scenarios'], opportunitiesForIntegration: 'Language: skits' },
-      { sessionLabel: 'Session 4', preLesson: 'Story Spotlight Hidilyn', flow: 'Synthesis … Success Markers … vision board creation … reflection …', learningResources: ['Board', 'Markers'], opportunitiesForIntegration: 'ICT: TikTok tagline' },
+      {
+        sessionLabel: 'Session 1',
+        preLesson: 'Greetings & Recall',
+        flow: 'Teacher presents objectives → wellness check → How well do you know yourself? … peer sharing 2 min… guided discussion … inclusion …'.repeat(
+          2
+        ),
+        learningResources: ['Powerpoint', 'Pictures'],
+        opportunitiesForIntegration: 'Social Studies: cultural influences',
+      },
+      {
+        sessionLabel: 'Session 2',
+        preLesson: 'Peer Interview',
+        flow: 'Teacher explains Super Exploration … Life Rainbow chart … wellness on tentative choices …',
+        learningResources: ['Materials'],
+        opportunitiesForIntegration: 'N/A',
+      },
+      {
+        sessionLabel: 'Session 3',
+        preLesson: 'Picture Analysis',
+        flow: 'Teacher reviews Erikson vs Super … Scenario Analysis groups … Discussion Qs …',
+        learningResources: ['Scenarios'],
+        opportunitiesForIntegration: 'Language: skits',
+      },
+      {
+        sessionLabel: 'Session 4',
+        preLesson: 'Story Spotlight Hidilyn',
+        flow: 'Synthesis … Success Markers … vision board creation … reflection …',
+        learningResources: ['Board', 'Markers'],
+        opportunitiesForIntegration: 'ICT: TikTok tagline',
+      },
     ],
   },
   assessment: {
     sessions: [
-      { sessionLabel: 'Session 1', formativeAssessment: 'MCQ 1. Erikson task of adolescence? A Trust B Identity … — 5 questions with accommodations' },
-      { sessionLabel: 'Session 2', formativeAssessment: 'Short answer: 5 Super stages… Establishment vs Maintenance — varied format' },
-      { sessionLabel: 'Session 3', formativeAssessment: 'Scenario Q: Marco risk factor… Madel protective factor… — case-based' },
-      { sessionLabel: 'Session 4', formativeAssessment: 'Reflective: How does stage help career decisions… — personal plan' },
+      {
+        sessionLabel: 'Session 1',
+        formativeAssessment:
+          'MCQ 1. Erikson task of adolescence? A Trust B Identity … — 5 questions with accommodations',
+      },
+      {
+        sessionLabel: 'Session 2',
+        formativeAssessment:
+          'Short answer: 5 Super stages… Establishment vs Maintenance — varied format',
+      },
+      {
+        sessionLabel: 'Session 3',
+        formativeAssessment: 'Scenario Q: Marco risk factor… Madel protective factor… — case-based',
+      },
+      {
+        sessionLabel: 'Session 4',
+        formativeAssessment: 'Reflective: How does stage help career decisions… — personal plan',
+      },
     ],
   },
   waysForward: {
     sessions: [
-      { sessionLabel: 'Session 1', extendedLearningOpportunities: 'Observe family … journal log…', reflections: null },
-      { sessionLabel: 'Session 2', extendedLearningOpportunities: 'Video log of behaviors …', reflections: null },
-      { sessionLabel: 'Session 3', extendedLearningOpportunities: 'Watch Inside Out and write analysis…', reflections: null },
-      { sessionLabel: 'Session 4', extendedLearningOpportunities: 'Legacy Tagline commercial … post on forum…', reflections: null },
+      {
+        sessionLabel: 'Session 1',
+        extendedLearningOpportunities: 'Observe family … journal log…',
+        reflections: null,
+      },
+      {
+        sessionLabel: 'Session 2',
+        extendedLearningOpportunities: 'Video log of behaviors …',
+        reflections: null,
+      },
+      {
+        sessionLabel: 'Session 3',
+        extendedLearningOpportunities: 'Watch Inside Out and write analysis…',
+        reflections: null,
+      },
+      {
+        sessionLabel: 'Session 4',
+        extendedLearningOpportunities: 'Legacy Tagline commercial … post on forum…',
+        reflections: null,
+      },
     ],
   },
 } satisfies Record<string, unknown>;
@@ -239,7 +323,10 @@ describe('POST /api/lesson-plans/generate — LLM + validation', () => {
       body: JSON.stringify({ extractionId: 'abc', termLabel: 'First Term', weekLabel: 'Week 1' }),
     });
     expect(res.status).toBe(200);
-    const j = (await res.json()) as { lessonPlan: { meta: { numberOfSessions: number } }; generationMetadata: { retried: boolean; provider: string } };
+    const j = (await res.json()) as {
+      lessonPlan: { meta: { numberOfSessions: number } };
+      generationMetadata: { retried: boolean; provider: string };
+    };
     expect(j.lessonPlan.meta.numberOfSessions).toBe(4);
     expect(j.generationMetadata.retried).toBe(false);
     expect(typeof j.generationMetadata.provider).toBe('string');
@@ -249,15 +336,26 @@ describe('POST /api/lesson-plans/generate — LLM + validation', () => {
     mockedExtractionCache.get.mockReturnValue(cachedExtraction());
     const badJson = invalidPlanJson('should be null');
     mockedChatDetailed
-      .mockResolvedValueOnce({ content: badJson, usage: { input: 10, output: 10 }, finishReason: 'stop' })
-      .mockResolvedValueOnce({ content: JSON.stringify(validLessonPlan), usage: { input: 10, output: 10 }, finishReason: 'stop' });
+      .mockResolvedValueOnce({
+        content: badJson,
+        usage: { input: 10, output: 10 },
+        finishReason: 'stop',
+      })
+      .mockResolvedValueOnce({
+        content: JSON.stringify(validLessonPlan),
+        usage: { input: 10, output: 10 },
+        finishReason: 'stop',
+      });
     const res = await app().request('/api/lesson-plans/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ extractionId: 'abc', termLabel: 'First Term', weekLabel: 'Week 1' }),
     });
     expect(res.status).toBe(200);
-    expect(((await res.json()) as { generationMetadata: { retried: boolean } }).generationMetadata.retried).toBe(true);
+    expect(
+      ((await res.json()) as { generationMetadata: { retried: boolean } }).generationMetadata
+        .retried
+    ).toBe(true);
     expect(mockedChatDetailed).toHaveBeenCalledTimes(2);
     // second call received appended validation error mentioning reflections
     const secondCall = mockedChatDetailed.mock.calls.at(1);
@@ -270,8 +368,16 @@ describe('POST /api/lesson-plans/generate — LLM + validation', () => {
     mockedExtractionCache.get.mockReturnValue(cachedExtraction());
     const badJson = invalidPlanJson('x');
     mockedChatDetailed
-      .mockResolvedValueOnce({ content: badJson, usage: { input: 10, output: 10 }, finishReason: 'stop' })
-      .mockResolvedValueOnce({ content: `${badJson}${'x'.repeat(10_000)}`, usage: { input: 10, output: 10 }, finishReason: 'stop' });
+      .mockResolvedValueOnce({
+        content: badJson,
+        usage: { input: 10, output: 10 },
+        finishReason: 'stop',
+      })
+      .mockResolvedValueOnce({
+        content: `${badJson}${'x'.repeat(10_000)}`,
+        usage: { input: 10, output: 10 },
+        finishReason: 'stop',
+      });
     const res = await app().request('/api/lesson-plans/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -287,11 +393,21 @@ describe('POST /api/lesson-plans/generate — LLM + validation', () => {
 
   it('provider/model overrides are forwarded to chatDetailed', async () => {
     mockedExtractionCache.get.mockReturnValue(cachedExtraction());
-    mockedChatDetailed.mockResolvedValueOnce({ content: JSON.stringify(validLessonPlan), usage: { input: 10, output: 10 }, finishReason: 'stop' });
+    mockedChatDetailed.mockResolvedValueOnce({
+      content: JSON.stringify(validLessonPlan),
+      usage: { input: 10, output: 10 },
+      finishReason: 'stop',
+    });
     const res = await app().request('/api/lesson-plans/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ extractionId: 'abc', termLabel: 'First Term', weekLabel: 'Week 1', provider: 'openrouter', model: 'test-model' }),
+      body: JSON.stringify({
+        extractionId: 'abc',
+        termLabel: 'First Term',
+        weekLabel: 'Week 1',
+        provider: 'openrouter',
+        model: 'test-model',
+      }),
     });
     expect(res.status).toBe(200);
     expect(mockedChatDetailed).toHaveBeenCalled();
@@ -306,7 +422,11 @@ describe('POST /api/lesson-plans/generate — LLM + validation', () => {
     const na = JSON.parse(JSON.stringify(validLessonPlan));
     na.learningExperience.sessions[1].opportunitiesForIntegration = 'N/A';
     mockedExtractionCache.get.mockReturnValue(cachedExtraction());
-    mockedChatDetailed.mockResolvedValueOnce({ content: JSON.stringify(na), usage: { input: 10, output: 10 }, finishReason: 'stop' });
+    mockedChatDetailed.mockResolvedValueOnce({
+      content: JSON.stringify(na),
+      usage: { input: 10, output: 10 },
+      finishReason: 'stop',
+    });
     const res = await app().request('/api/lesson-plans/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

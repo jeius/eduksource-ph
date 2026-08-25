@@ -17,6 +17,7 @@ export interface ChatOptions {
   temperature?: number;
   top_p?: number;
   max_completion_tokens?: number;
+  response_format?: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming['response_format'];
 }
 
 export type ChatUsage = { input: number; output: number };
@@ -71,14 +72,16 @@ function buildBody(
   model: string,
   stream: boolean
 ): ChatRequest {
-  return {
+  const body: ChatRequest = {
     model,
     messages,
     temperature: opts.temperature ?? 1,
     max_completion_tokens: opts.max_completion_tokens ?? 8192,
     top_p: opts.top_p ?? 0.95,
+    ...(opts.response_format ? { response_format: opts.response_format } : {}),
     stream,
   };
+  return body;
 }
 
 function modelListOptions(

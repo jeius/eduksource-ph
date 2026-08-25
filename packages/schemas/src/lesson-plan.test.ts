@@ -52,12 +52,14 @@ describe('LessonPlanResponseSchema', () => {
   });
 
   it('rejects reflections != null with correct path', () => {
+    const firstSession = valid.waysForward.sessions[0];
+    if (!firstSession) throw new Error('valid fixture missing first session');
     const bad = {
       ...valid,
       waysForward: {
         sessions: [
           {
-            ...valid.waysForward.sessions[0]!,
+            ...firstSession,
             // intentional invalid value: reflections must be null
             reflections: 'oops' as unknown as null,
           },
@@ -66,7 +68,9 @@ describe('LessonPlanResponseSchema', () => {
     };
     const r = LessonPlanResponseSchema.safeParse(bad);
     expect(r.success).toBe(false);
-    expect(r.error?.issues[0]!.path.join('.')).toContain('reflections');
+    if (!r.success) {
+      expect(r.error.issues[0]?.path.join('.')).toContain('reflections');
+    }
   });
 
   it('rejects empty formativeAssessment', () => {

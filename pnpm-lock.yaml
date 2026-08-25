@@ -82,6 +82,9 @@ importers:
       '@eduksource/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@eduksource/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       '@hono/node-server':
         specifier: ^2.1.0
         version: 2.1.0(hono@4.13.1)

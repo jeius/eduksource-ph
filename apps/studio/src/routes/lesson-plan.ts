@@ -1,6 +1,9 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { LessonPlanResponseSchema } from '@eduksource/schemas/lesson-plan.js';
+import type { ChatDetailedResult, ChatMessage, ChatOptions } from '../lib/ai/client.js';
+import { chatDetailed } from '../lib/ai/client.js';
 import { primaryContextWindow } from '../lib/ai/providers.js';
 import { extractionCache } from '../lib/cache.js';
 import { buildMaxCompletionTokens, estimateTokens } from '../lib/tokens.js';
@@ -189,8 +192,226 @@ export function createLessonPlanRoutes() {
       });
     }
 
-    // Non-dryRun path is stubbed this task — Task 4 wires chatDetailed + validation/retry.
-    return c.json({ error: 'Not Implemented — lesson-plan generation requires Task 4' }, 501);
+    // Non-dryRun path — full LLM wiring (Task 4).
+    const maxCompletionTokens = buildMaxCompletionTokens(primaryContextWindow, promptForBudget);
+
+    const lessonPlanJsonSchema: Record<string, unknown> = {
+      type: 'object',
+      properties: {
+        meta: {
+          type: 'object',
+          properties: {
+            lessonTitle: { type: 'string' },
+            numberOfSessions: { type: 'integer', minimum: 1 },
+            referencesFromBow: { type: 'array', items: { type: 'string' } },
+          },
+          required: ['lessonTitle', 'numberOfSessions', 'referencesFromBow'],
+        },
+        intentions: {
+          type: 'object',
+          properties: {
+            learningCompetencyAndStandards: {
+              type: 'object',
+              properties: {
+                contentStandard: { type: 'array', items: { type: 'string' } },
+                performanceStandard: { type: 'array', items: { type: 'string' } },
+                learningCompetency: { type: 'string' },
+              },
+              required: ['contentStandard', 'performanceStandard', 'learningCompetency'],
+            },
+            sessions: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                properties: {
+                  sessionLabel: { type: 'string' },
+                  learningObjectives: { type: 'array', items: { type: 'string' } },
+                  learnerContext: { type: 'string' },
+                },
+                required: ['sessionLabel', 'learningObjectives', 'learnerContext'],
+              },
+            },
+          },
+          required: ['learningCompetencyAndStandards', 'sessions'],
+        },
+        learningExperience: {
+          type: 'object',
+          properties: {
+            sessions: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                properties: {
+                  sessionLabel: { type: 'string' },
+                  preLesson: { type: 'string' },
+                  flow: { type: 'string' },
+                  learningResources: { type: 'array', items: { type: 'string' } },
+                  opportunitiesForIntegration: { type: 'string' },
+                },
+                required: [
+                  'sessionLabel',
+                  'preLesson',
+                  'flow',
+                  'learningResources',
+                  'opportunitiesForIntegration',
+                ],
+              },
+            },
+          },
+          required: ['sessions'],
+        },
+        assessment: {
+          type: 'object',
+          properties: {
+            sessions: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                properties: {
+                  sessionLabel: { type: 'string' },
+                  formativeAssessment: { type: 'string' },
+                },
+                required: ['sessionLabel', 'formativeAssessment'],
+              },
+            },
+          },
+          required: ['sessions'],
+        },
+        waysForward: {
+          type: 'object',
+          properties: {
+            sessions: {
+              type: 'array',
+              minItems: 1,
+              items: {
+                type: 'object',
+                properties: {
+                  sessionLabel: { type: 'string' },
+                  extendedLearningOpportunities: { type: 'string' },
+                  reflections: { type: 'null' },
+                },
+                required: ['sessionLabel', 'extendedLearningOpportunities', 'reflections'],
+              },
+            },
+          },
+          required: ['sessions'],
+        },
+      },
+      required: ['meta', 'intentions', 'learningExperience', 'assessment', 'waysForward'],
+    };
+
+    let retried = false;
+    let rawContent: string | null = null;
+    let providerUsed = body.provider ?? 'primary';
+    let modelUsed = body.model ?? 'default';
+
+    const callOnce = async (
+      messages: ChatMessage[],
+      opts: ChatOptions
+    ): Promise<ChatDetailedResult> => {
+      try {
+        return await chatDetailed(messages, {
+          ...opts,
+          response_format: {
+            type: 'json_schema',
+            json_schema: { name: 'LessonPlanResponse', schema: lessonPlanJsonSchema, strict: true },
+          },
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (/response_format|json_schema|unsupported/i.test(msg)) {
+          // Single prose fallback — same messages without response_format.
+          return chatDetailed(messages, opts);
+        }
+        throw err;
+      }
+    };
+
+    const tryParse = (content: string | null) => {
+      if (content === null) throw new Error('Empty LLM response');
+      return LessonPlanResponseSchema.parse(JSON.parse(content));
+    };
+
+    const messages: ChatMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ];
+    const opts: ChatOptions = {
+      task: 'lesson_plan',
+      max_completion_tokens: maxCompletionTokens,
+      model: body.model,
+    };
+
+    try {
+      const first = await callOnce(messages, opts);
+      rawContent = first.content;
+      providerUsed = (first as { provider?: string }).provider ?? providerUsed;
+      modelUsed = (first as { model?: string }).model ?? modelUsed;
+      try {
+        const lessonPlan = tryParse(first.content);
+        return c.json({
+          lessonPlan,
+          generationMetadata: {
+            provider: providerUsed,
+            model: modelUsed,
+            generatedAt: new Date().toISOString(),
+            retried,
+          },
+        });
+      } catch (firstErr) {
+        const validationMsg =
+          firstErr instanceof Error ? firstErr.message : String(firstErr);
+        retried = true;
+        const retryMessages: ChatMessage[] = [
+          { role: 'system', content: systemPrompt },
+          {
+            role: 'user',
+            content: `${userPrompt}\n\nPrevious output failed validation:\n - ${validationMsg}\nReturn only valid JSON.`,
+          },
+        ];
+        const second = await callOnce(retryMessages, opts);
+        rawContent = second.content;
+        try {
+          const lessonPlan = tryParse(second.content);
+          return c.json({
+            lessonPlan,
+            generationMetadata: {
+              provider: providerUsed,
+              model: modelUsed,
+              generatedAt: new Date().toISOString(),
+              retried,
+            },
+          });
+        } catch (secondErr) {
+          return c.json(
+            {
+              error: 'Lesson plan generation failed validation after retry',
+              validationErrors:
+                secondErr instanceof Error ? secondErr.message : String(secondErr),
+              raw: (second.content ?? '').slice(0, 8192),
+              provider: providerUsed,
+              model: modelUsed,
+            },
+            502
+          );
+        }
+      }
+    } catch (fatal) {
+      // Provider chain exhausted or unrecoverable — 502 with trimmed raw.
+      return c.json(
+        {
+          error: 'Lesson plan generation failed',
+          validationErrors: fatal instanceof Error ? fatal.message : String(fatal),
+          raw: (rawContent ?? '').slice(0, 8192),
+          provider: providerUsed,
+          model: modelUsed,
+        },
+        502
+      );
+    }
   });
 
   return app;

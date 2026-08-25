@@ -8,6 +8,7 @@ import type { HonoSchema } from './lib/types.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { createExtractRoutes } from './routes/extract.js';
 import { createHealthRoutes } from './routes/health.js';
+import { createLessonPlanRoutes } from './routes/lesson-plan.js';
 
 const app = new Hono<HonoSchema>();
 
@@ -24,6 +25,7 @@ app.onError(errorHandler());
 /********* Routes *********/
 app.route('/health', createHealthRoutes());
 app.route('/api', createExtractRoutes());
+app.route('/api/lesson-plans', createLessonPlanRoutes());
 
 app.get('/', (c) => {
   return c.text('Hello Hono!');

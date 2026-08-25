@@ -2,11 +2,11 @@
 
 Current execution status and immediate next steps. Updated per the weekly check-in (see `docs/plan.md` §1). Roadmap lives in `docs/plan.md`.
 
-**Status as of:** 2026-08-24
+**Status as of:** 2026-08-25
 
 ## Current phase
 
-Phase 1 — Foundation (`docs/plan.md` §2). Track B (Studio) in progress; Track A complete through Phase 2 API-first stubs (catalog).
+Phase 1 — Foundation (`docs/plan.md` §2). Track B (Studio) in progress (lesson-plan done; PPTX/DOCX/exam next); Track A complete through Phase 2 API-first stubs (catalog).
 
 ## Done
 
@@ -25,10 +25,11 @@ Phase 1 — Foundation (`docs/plan.md` §2). Track B (Studio) in progress; Track
   - PDF extraction route: BOW PDF → structured objectives JSON (vision fallback, caching, token budgeting)
   - In-memory extraction result cache (per-file hash)
   - Provider registry with cross-provider fallback (ADR-0002)
+  - Lesson plan generation route: `POST /api/lesson-plans/generate` — filtered week slice (block overrides term), 7 Learning Design Principles + hard guards (reflections null, N/A literal), one-session Week 1 S1 exemplar (quality > cost), `json_schema` primary → prose fallback, Zod validate + single retry → 502, `dryRun` harness, 410/404 with available labels, shared `LessonPlanResponse` Zod in `packages/schemas`, shared token budgeting helper (`estimateTokens`/`buildMaxCompletionTokens`), 11/11 tests
 
 ## In progress
 
-- Phase 1 Track B: lesson plan generation route
+_(nothing currently in flight)_
 
 ## Next up
 

@@ -78,7 +78,7 @@ describe('POST /api/extract — structural patterns', () => {
   });
 
   it('extracts real text from the English fixture and passes it to NIM', async () => {
-    await postFixture(app, 'BOW-[G7]-English.pdf');
+    await postFixture(app, 'BOW_[G7]_English.pdf');
     expect(mockedChatDetailed).toHaveBeenCalledTimes(1);
     const call = mockedChatDetailed.mock.calls[0]![0]! as Array<{
       role: string;
@@ -112,7 +112,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, 'BOW-[G7]-English.pdf');
+    const res = await postFixture(app, 'BOW_[G7]_English.pdf');
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.terms[0]!.blocks[0]!.weekLabel).toBe('*');
   });
@@ -145,7 +145,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, 'BOW-[G10]-Values Education-Three-Term.pdf');
+    const res = await postFixture(app, 'BOW_[G10]_Values_Education_Three_Term.pdf');
     const body = (await res.json()) as ExtractResponse;
     const block = body.document.terms[0]!.blocks[0]!;
     expect(body.document.terms[0]!.contentStandard).toBeNull();
@@ -184,7 +184,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, '[G9] MAPEH.pdf');
+    const res = await postFixture(app, '[G9]_MAPEH.pdf');
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.documentNotes).toBe('2 hours per week total');
     expect(body.document.terms[0]!.blocks[0]!.strands.map((s) => s.strandLabel)).toEqual([
@@ -222,7 +222,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, '[G9] Mathematics.pdf');
+    const res = await postFixture(app, '[G9]_Mathematics.pdf');
     const body = (await res.json()) as ExtractResponse;
     const block = body.document.terms[0]!.blocks[0]!;
     expect(block.weekLabel).toBe('1 to 2 (10 days)');
@@ -256,7 +256,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, '[G4] Science.pdf');
+    const res = await postFixture(app, '[G4]_Science.pdf');
     const body = (await res.json()) as ExtractResponse;
     const term = body.document.terms[0]!;
     expect(term.contentStandard).toEqual(['Standard A', 'Standard B']);
@@ -302,7 +302,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, '[G11] Life and Career Skills.pdf');
+    const res = await postFixture(app, '[G11]_Life_and_Career_Skills.pdf');
     const body = (await res.json()) as ExtractResponse;
     const term = body.document.terms[0]!;
     const raw = term.blocks[0]!.strands[0]!.competenciesRaw;
@@ -338,7 +338,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, '[G11] Pag-aaral ng Kasaysayan at Lipunang Pilipino.pdf');
+    const res = await postFixture(app, '[G11]_Pag_aaral_ng_Kasaysayan_at_Lipunang_Pilipino.pdf');
     const body = (await res.json()) as ExtractResponse;
     expect(body.document.terms[0]!.termLabel).toBe('Unang Termino');
     expect(body.document.terms[0]!.blocks[0]!.weekLabel).toBe('Linggo 1');
@@ -380,7 +380,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, 'BOW-[G10]-Values Education-Three-Term.pdf');
+    const res = await postFixture(app, 'BOW_[G10]_Values_Education_Three_Term.pdf');
     expect(res.status).toBe(200);
     const call = mockedChatDetailed.mock.calls[0]![0]! as Array<{
       role: string;
@@ -415,7 +415,7 @@ describe('POST /api/extract — structural patterns', () => {
         },
       ],
     });
-    const res = await postFixture(app, '[G11] Filipino.pdf');
+    const res = await postFixture(app, '[G11]_Filipino.pdf');
     expect(res.status).toBe(200);
     const call = mockedChatDetailed.mock.calls[0]![0]! as Array<{
       role: string;

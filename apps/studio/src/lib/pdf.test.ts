@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 describe('extractText', () => {
   it('extracts text and page count from BOW PDF fixture', async () => {
     const fixture = new Uint8Array(
-      await readFile(join(__dirname, '..', '..', 'tests', 'fixtures', 'BOW-[G7]-English.pdf'))
+      await readFile(join(__dirname, '..', '..', 'tests', 'fixtures', 'BOW_[G7]_English.pdf'))
     );
     const result = await extractText(fixture);
     expect(result.pages).toBeGreaterThan(0);
@@ -22,7 +22,7 @@ describe('extractText', () => {
 describe('pdfPagesToPngs', () => {
   it('renders every page of the English fixture to base64 PNGs', async () => {
     const fixture = new Uint8Array(
-      await readFile(join(__dirname, '..', '..', 'tests', 'fixtures', 'BOW-[G7]-English.pdf'))
+      await readFile(join(__dirname, '..', '..', 'tests', 'fixtures', 'BOW_[G7]_English.pdf'))
     );
     const images = await pdfPagesToPngs(fixture, 50);
     expect(images.length).toBe(11);
@@ -32,7 +32,7 @@ describe('pdfPagesToPngs', () => {
 
   it('throws TooManyPagesError when the document exceeds maxPages', async () => {
     const fixture = new Uint8Array(
-      await readFile(join(__dirname, '..', '..', 'tests', 'fixtures', 'BOW-[G7]-English.pdf'))
+      await readFile(join(__dirname, '..', '..', 'tests', 'fixtures', 'BOW_[G7]_English.pdf'))
     );
     await expect(pdfPagesToPngs(fixture, 1)).rejects.toThrow(TooManyPagesError);
   });

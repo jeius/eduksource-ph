@@ -9,6 +9,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./lesson-plan": {
+      "types": "./dist/lesson-plan.d.ts",
+      "default": "./dist/lesson-plan.js"
+    },
+    "./lesson-plan.js": {
+      "types": "./dist/lesson-plan.d.ts",
+      "default": "./dist/lesson-plan.js"
     }
   },
   "scripts": {

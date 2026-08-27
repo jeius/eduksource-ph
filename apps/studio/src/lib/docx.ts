@@ -231,7 +231,7 @@ function sessionBodyCell(paras: Paragraph[], width: number): TableCell {
   });
 }
 
-function bodyTable(lp: LessonPlanResponse, fields: SystemFields): Table {
+function bodyTable(lp: LessonPlanResponse): Table {
   const n = lp.meta.numberOfSessions;
   const col = sessionColWidth(n);
   const intentionsSessions = lp.intentions.sessions;
@@ -380,7 +380,7 @@ export async function assembleDocx(
 
   children.push(headerTable(lp, fields));
   children.push(new Paragraph({ children: [new TextRun({ text: ' ' })] }));
-  children.push(bodyTable(lp, fields));
+  children.push(bodyTable(lp));
   children.push(new Paragraph({ children: [new TextRun({ text: ' ' })] }));
   children.push(signatureTable(fields));
   children.push(

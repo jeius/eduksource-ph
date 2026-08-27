@@ -26,6 +26,14 @@
       "types": "./dist/slide-deck.d.ts",
       "default": "./dist/slide-deck.js"
     },
+    "./system-fields": {
+      "types": "./dist/system-fields.d.ts",
+      "default": "./dist/system-fields.js"
+    },
+    "./system-fields.js": {
+      "types": "./dist/system-fields.d.ts",
+      "default": "./dist/system-fields.js"
+    },
     "./studio-constants": {
       "types": "./dist/studio-constants.d.ts",
       "default": "./dist/studio-constants.js"

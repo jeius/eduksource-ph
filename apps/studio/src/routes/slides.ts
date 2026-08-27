@@ -8,7 +8,7 @@ import type { ChatDetailedResult, ChatMessage, ChatOptions } from '../lib/ai/cli
 import { chatDetailed } from '../lib/ai/client.js';
 import { primaryContextWindow } from '../lib/ai/providers.js';
 import { extractionCache } from '../lib/cache.js';
-import type { SystemFields } from '../lib/pptx.js';
+import type { SystemFields } from '@eduksource/schemas/system-fields.js';
 import { assemblePptx } from '../lib/pptx.js';
 import type { SelectedSession } from '../lib/slides.js';
 import { buildSlidePrompts, SessionNotFoundError, selectSession } from '../lib/slides.js';

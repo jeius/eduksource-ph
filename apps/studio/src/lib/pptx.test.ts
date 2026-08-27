@@ -1,7 +1,7 @@
 import type { SlideDeckSpec } from '@eduksource/schemas/slide-deck.js';
 import { TEACHER_FILL_BLANK } from '@eduksource/schemas/studio-constants.js';
 import { beforeAll, describe, expect, it } from 'vitest';
-import type { SystemFields } from './pptx.js';
+import type { SystemFields } from '@eduksource/schemas/system-fields.js';
 import { assemblePptx, assemblePptxToBase64 } from './pptx.js';
 
 const deck: SlideDeckSpec = {

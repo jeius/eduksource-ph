@@ -5,7 +5,9 @@
   "author": "Julius Pahama <https://www.linkedin.com/in/julius-pahama>",
   "license": "MIT",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "tsx --env-file=.env --watch src/index.ts",
     "build": "tsc --project tsconfig.build.json",
@@ -27,6 +29,7 @@
     "http-status": "^2.1.0",
     "openai": "^7.4.0",
     "pdfjs-dist": "^6.2.108",
+    "pptxgenjs": "^4.0.1",
     "unpdf": "^1.8.0",
     "zod": "^4.4.3"
   },

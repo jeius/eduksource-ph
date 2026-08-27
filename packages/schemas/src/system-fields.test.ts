@@ -22,13 +22,21 @@ describe('SystemFieldsSchema', () => {
   });
 
   it('accepts the minimal PPTX-era shape (signatures/letterhead omitted)', () => {
-    const { preparedBy, checkedBy, notedBy, checkedByRole, notedByRole, letterhead, ...minimal } = full;
-    void preparedBy; void checkedBy; void notedBy; void checkedByRole; void notedByRole; void letterhead;
+    const { preparedBy, checkedBy, notedBy, checkedByRole, notedByRole, letterhead, ...minimal } =
+      full;
+    void preparedBy;
+    void checkedBy;
+    void notedBy;
+    void checkedByRole;
+    void notedByRole;
+    void letterhead;
     expect(() => SystemFieldsSchema.parse(minimal)).not.toThrow();
   });
 
   it('accepts null teacherName/sectionLabel (fill-blank path)', () => {
-    expect(() => SystemFieldsSchema.parse({ ...full, teacherName: null, sectionLabel: null })).not.toThrow();
+    expect(() =>
+      SystemFieldsSchema.parse({ ...full, teacherName: null, sectionLabel: null })
+    ).not.toThrow();
   });
 
   it('requires gradeLevel, learningArea, bowReference and generationMetadata', () => {

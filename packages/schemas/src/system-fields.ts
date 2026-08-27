@@ -26,7 +26,10 @@ export const SystemFieldsSchema = z.object({
   notedBy: z.string().min(1).nullable().optional(),
   checkedByRole: z.string().min(1).optional(),
   notedByRole: z.string().min(1).optional(),
-  letterhead: z.object({ lines: z.array(z.string().min(1)).min(1) }).nullable().optional(),
+  letterhead: z
+    .object({ lines: z.array(z.string().min(1)).min(1) })
+    .nullable()
+    .optional(),
 });
 
 export type SystemFields = z.infer<typeof SystemFieldsSchema>;

@@ -51,14 +51,34 @@ const validLessonPlan = {
       learningCompetency: 'Examine sense of self',
     },
     sessions: [
-      { sessionLabel: 'Session 1', learningObjectives: ['identify stages'], learnerContext: 'visual learners' },
-      { sessionLabel: 'Session 2', learningObjectives: ['map careers'], learnerContext: 'career focus' },
+      {
+        sessionLabel: 'Session 1',
+        learningObjectives: ['identify stages'],
+        learnerContext: 'visual learners',
+      },
+      {
+        sessionLabel: 'Session 2',
+        learningObjectives: ['map careers'],
+        learnerContext: 'career focus',
+      },
     ],
   },
   learningExperience: {
     sessions: [
-      { sessionLabel: 'Session 1', preLesson: 'Greetings', flow: 'Teacher presents objectives.', learningResources: ['Slides'], opportunitiesForIntegration: 'N/A' },
-      { sessionLabel: 'Session 2', preLesson: 'Recall', flow: 'Career mapping.', learningResources: [], opportunitiesForIntegration: 'ICT' },
+      {
+        sessionLabel: 'Session 1',
+        preLesson: 'Greetings',
+        flow: 'Teacher presents objectives.',
+        learningResources: ['Slides'],
+        opportunitiesForIntegration: 'N/A',
+      },
+      {
+        sessionLabel: 'Session 2',
+        preLesson: 'Recall',
+        flow: 'Career mapping.',
+        learningResources: [],
+        opportunitiesForIntegration: 'ICT',
+      },
     ],
   },
   assessment: {
@@ -69,8 +89,16 @@ const validLessonPlan = {
   },
   waysForward: {
     sessions: [
-      { sessionLabel: 'Session 1', extendedLearningOpportunities: 'Family walk.', reflections: null },
-      { sessionLabel: 'Session 2', extendedLearningOpportunities: 'Interview pro.', reflections: null },
+      {
+        sessionLabel: 'Session 1',
+        extendedLearningOpportunities: 'Family walk.',
+        reflections: null,
+      },
+      {
+        sessionLabel: 'Session 2',
+        extendedLearningOpportunities: 'Interview pro.',
+        reflections: null,
+      },
     ],
   },
 };
@@ -177,7 +205,10 @@ async function extractDocumentXml(buf: Buffer): Promise<string> {
   let start = 0;
   while (start < u8.length - 30) {
     const sig =
-      u8[start] === 0x50 && u8[start + 1] === 0x4b && u8[start + 2] === 0x03 && u8[start + 3] === 0x04;
+      u8[start] === 0x50 &&
+      u8[start + 1] === 0x4b &&
+      u8[start + 2] === 0x03 &&
+      u8[start + 3] === 0x04;
     if (!sig) {
       start += 1;
       continue;

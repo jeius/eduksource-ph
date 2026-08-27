@@ -1,17 +1,12 @@
-import type {
-  LessonPlanResponse,
-} from '@eduksource/schemas/lesson-plan.js';
+import type { LessonPlanResponse } from '@eduksource/schemas/lesson-plan.js';
+import { TEACHER_FILL_BLANK, TEACHER_FILL_NOTE } from '@eduksource/schemas/studio-constants.js';
 import type { SystemFields } from '@eduksource/schemas/system-fields.js';
-import {
-  TEACHER_FILL_BLANK,
-  TEACHER_FILL_NOTE,
-} from '@eduksource/schemas/studio-constants.js';
 import {
   AlignmentType,
   Document,
   type ISectionOptions,
-  PageBreak,
   Packer,
+  PageBreak,
   Paragraph,
   ShadingType,
   Table,
@@ -87,9 +82,7 @@ function cellParagraphs(lines: string[], bold = false): Paragraph[] {
 function labelCell(text: string, rowHeightHint: number): TableCell {
   return new TableCell({
     width: { size: LABEL_COL_WIDTH, type: WidthType.DXA },
-    children: [
-      new Paragraph({ children: [new TextRun({ text, bold: true })] }),
-    ],
+    children: [new Paragraph({ children: [new TextRun({ text, bold: true })] })],
     margins: { top: rowHeightHint, bottom: rowHeightHint },
   });
 }
@@ -103,9 +96,7 @@ function bannerRow(label: keyof typeof BANNER_INTROS): TableRow {
         shading: { type: ShadingType.CLEAR, fill: 'D9D9D9' },
         children: [
           new Paragraph({
-            children: [
-              new TextRun({ text: `${label}. `, italics: true, bold: true }),
-            ],
+            children: [new TextRun({ text: `${label}. `, italics: true, bold: true })],
           }),
           new Paragraph({
             children: [new TextRun({ text: BANNER_INTROS[label], italics: true })],
@@ -137,7 +128,12 @@ export function buildRubricPage(): (Paragraph | Table)[] {
       columnWidths: rubricColWidths,
       rows: [
         new TableRow({
-          children: ['I can say that in my lesson plan…', 'Yes', 'Not Yet', 'Why?/ What will make it better?'].map(
+          children: [
+            'I can say that in my lesson plan…',
+            'Yes',
+            'Not Yet',
+            'Why?/ What will make it better?',
+          ].map(
             (h, i) =>
               new TableCell({
                 width: { size: rubricColWidths[i] as number, type: WidthType.DXA },
@@ -176,24 +172,17 @@ function headerTable(lp: LessonPlanResponse, fields: SystemFields): Table {
   const rows: Array<[string, Paragraph[]]> = [
     ['Lesson Title', cellParagraphs([lp.meta.lessonTitle])],
     ['Learning Area/s', cellParagraphs([fields.learningArea])],
-    [
-      'Name of Teacher/s',
-      cellParagraphs([fields.teacherName ?? TEACHER_FILL_BLANK]),
-    ],
+    ['Name of Teacher/s', cellParagraphs([fields.teacherName ?? TEACHER_FILL_BLANK])],
     [
       'Grade Level and Section',
-      cellParagraphs([
-        `${fields.gradeLevel} ${fields.sectionLabel ?? TEACHER_FILL_BLANK}`,
-      ]),
+      cellParagraphs([`${fields.gradeLevel} ${fields.sectionLabel ?? TEACHER_FILL_BLANK}`]),
     ],
     ['No. of Sessions', cellParagraphs([String(lp.meta.numberOfSessions)])],
     [
       'References\n(books, websites, toolkits, etc.)'.split('\n')[0] as string,
       [
         new Paragraph({
-          children: [
-            new TextRun({ text: `1. ${fields.bowReference}`, bold: true }),
-          ],
+          children: [new TextRun({ text: `1. ${fields.bowReference}`, bold: true })],
         }),
         ...lp.meta.referencesFromBow.map(
           (ref, i) =>
@@ -259,10 +248,7 @@ function bodyTable(lp: LessonPlanResponse): Table {
     new Paragraph({ children: [new TextRun({ text: competency.learningCompetency })] }),
   ];
 
-  const perSessionRow = (
-    label: string,
-    pick: (i: number) => string[] | Paragraph[]
-  ): TableRow =>
+  const perSessionRow = (label: string, pick: (i: number) => string[] | Paragraph[]): TableRow =>
     new TableRow({
       children: [
         labelCell(label, 60),
@@ -291,12 +277,11 @@ function bodyTable(lp: LessonPlanResponse): Table {
       new TableRow({
         children: [
           labelCell('Session', 60),
-          ...intentionsSessions.map(
-            (s) =>
-              sessionBodyCell(
-                [new Paragraph({ children: [new TextRun({ text: s.sessionLabel, bold: true })] })],
-                col
-              )
+          ...intentionsSessions.map((s) =>
+            sessionBodyCell(
+              [new Paragraph({ children: [new TextRun({ text: s.sessionLabel, bold: true })] })],
+              col
+            )
           ),
         ],
       }),
@@ -320,7 +305,9 @@ function bodyTable(lp: LessonPlanResponse): Table {
         experienceSessions[i]?.opportunitiesForIntegration ?? '',
       ]),
       bannerRow('Assessment'),
-      perSessionRow('Formative Assessment', (i) => [assessmentSessions[i]?.formativeAssessment ?? '']),
+      perSessionRow('Formative Assessment', (i) => [
+        assessmentSessions[i]?.formativeAssessment ?? '',
+      ]),
       bannerRow('Ways Forward'),
       perSessionRow('Extended learning opportunities', (i) => [
         waysForwardSessions[i]?.extendedLearningOpportunities ?? '',
@@ -334,7 +321,11 @@ function signatureTable(fields: SystemFields): Table {
   const col = Math.floor(TABLE_WIDTH / 3);
   const cols: Array<{ name: string; label: string; role?: string }> = [
     { name: fields.preparedBy ?? fields.teacherName ?? TEACHER_FILL_BLANK, label: 'Prepared by:' },
-    { name: fields.checkedBy ?? TEACHER_FILL_BLANK, label: 'Checked by:', role: fields.checkedByRole },
+    {
+      name: fields.checkedBy ?? TEACHER_FILL_BLANK,
+      label: 'Checked by:',
+      role: fields.checkedByRole,
+    },
     { name: fields.notedBy ?? TEACHER_FILL_BLANK, label: 'Noted:', role: fields.notedByRole },
   ];
   return new Table({
@@ -350,9 +341,7 @@ function signatureTable(fields: SystemFields): Table {
                 new Paragraph({ children: [new TextRun({ text: c.label })] }),
                 new Paragraph({ children: [new TextRun({ text: ' ' })] }),
                 new Paragraph({ children: [new TextRun({ text: c.name, bold: true })] }),
-                ...(c.role
-                  ? [new Paragraph({ children: [new TextRun({ text: c.role })] })]
-                  : []),
+                ...(c.role ? [new Paragraph({ children: [new TextRun({ text: c.role })] })] : []),
               ],
             })
         ),
@@ -361,10 +350,7 @@ function signatureTable(fields: SystemFields): Table {
   });
 }
 
-export async function assembleDocx(
-  lp: LessonPlanResponse,
-  fields: SystemFields
-): Promise<Buffer> {
+export async function assembleDocx(lp: LessonPlanResponse, fields: SystemFields): Promise<Buffer> {
   const children: (Paragraph | Table)[] = [];
 
   if (fields.letterhead?.lines?.length) {
@@ -383,9 +369,7 @@ export async function assembleDocx(
   children.push(bodyTable(lp));
   children.push(new Paragraph({ children: [new TextRun({ text: ' ' })] }));
   children.push(signatureTable(fields));
-  children.push(
-    new Paragraph({ children: [new PageBreak()] })
-  );
+  children.push(new Paragraph({ children: [new PageBreak()] }));
   children.push(...buildRubricPage());
 
   const doc = new Document({

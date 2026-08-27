@@ -1,6 +1,6 @@
 import type { SlideDeckSpec } from '@eduksource/schemas/slide-deck.js';
-import type { SystemFields } from '@eduksource/schemas/system-fields.js';
 import { TEACHER_FILL_BLANK } from '@eduksource/schemas/studio-constants.js';
+import type { SystemFields } from '@eduksource/schemas/system-fields.js';
 import PptxGenJSImport from 'pptxgenjs';
 
 // Minimal structural types for what this assembler uses from pptxgenjs.

@@ -1,9 +1,6 @@
 import type { LessonPlanResponse } from '@eduksource/schemas/lesson-plan.js';
+import { TEACHER_FILL_BLANK, TEACHER_FILL_NOTE } from '@eduksource/schemas/studio-constants.js';
 import type { SystemFields } from '@eduksource/schemas/system-fields.js';
-import {
-  TEACHER_FILL_BLANK,
-  TEACHER_FILL_NOTE,
-} from '@eduksource/schemas/studio-constants.js';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assembleDocx } from './docx.js';
 
@@ -20,8 +17,16 @@ const lp: LessonPlanResponse = {
       learningCompetency: 'Examine developmental stages and tasks.',
     },
     sessions: [
-      { sessionLabel: 'Session 1', learningObjectives: ['identify stages'], learnerContext: 'visual learners' },
-      { sessionLabel: 'Session 2', learningObjectives: ['map careers'], learnerContext: 'career focus' },
+      {
+        sessionLabel: 'Session 1',
+        learningObjectives: ['identify stages'],
+        learnerContext: 'visual learners',
+      },
+      {
+        sessionLabel: 'Session 2',
+        learningObjectives: ['map careers'],
+        learnerContext: 'career focus',
+      },
     ],
   },
   learningExperience: {
@@ -50,8 +55,16 @@ const lp: LessonPlanResponse = {
   },
   waysForward: {
     sessions: [
-      { sessionLabel: 'Session 1', extendedLearningOpportunities: 'Family observation walk.', reflections: null },
-      { sessionLabel: 'Session 2', extendedLearningOpportunities: 'Interview a professional.', reflections: null },
+      {
+        sessionLabel: 'Session 1',
+        extendedLearningOpportunities: 'Family observation walk.',
+        reflections: null,
+      },
+      {
+        sessionLabel: 'Session 2',
+        extendedLearningOpportunities: 'Interview a professional.',
+        reflections: null,
+      },
     ],
   },
 };
@@ -80,7 +93,10 @@ async function packXml(doc: unknown): Promise<string> {
   let start = 0;
   while (start < u8.length - 30) {
     const sig =
-      u8[start] === 0x50 && u8[start + 1] === 0x4b && u8[start + 2] === 0x03 && u8[start + 3] === 0x04;
+      u8[start] === 0x50 &&
+      u8[start + 1] === 0x4b &&
+      u8[start + 2] === 0x03 &&
+      u8[start + 3] === 0x04;
     if (!sig) {
       start += 1;
       continue;
@@ -114,9 +130,7 @@ describe('assembleDocx', () => {
 
   beforeAll(async () => {
     buffer = await assembleDocx(lp, baseFields);
-    const doc = (
-      globalThis as { __lastDocxDocument?: unknown }
-    ).__lastDocxDocument;
+    const doc = (globalThis as { __lastDocxDocument?: unknown }).__lastDocxDocument;
     if (!doc) throw new Error('assembler did not expose __lastDocxDocument');
     xml = await packXml(doc);
   });
@@ -160,9 +174,7 @@ describe('assembleDocx', () => {
       notedBy: null,
       letterhead: null,
     });
-    const doc = (
-      globalThis as { __lastDocxDocument?: unknown }
-    ).__lastDocxDocument;
+    const doc = (globalThis as { __lastDocxDocument?: unknown }).__lastDocxDocument;
     if (!doc) throw new Error('assembler did not expose __lastDocxDocument');
     const anonXml = await packXml(doc);
     expect(anonXml).toContain(TEACHER_FILL_BLANK);

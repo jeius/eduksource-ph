@@ -191,11 +191,34 @@ const VALID_DECK = {
       sessionLabel: 'Session 1',
       slides: [
         { layout: 'title', heading: 'Understanding developmental stages', imagePrompt: null },
-        { layout: 'objectives', heading: 'Learning Objectives', bullets: ['a', 'b'], speakerNotes: 'n1' },
-        { layout: 'motivation', heading: 'Hook', bullets: ['hook question'], speakerNotes: 'n2', imagePrompt: 'opening scene' },
-        { layout: 'content', heading: 'C1', bullets: ['x'], speakerNotes: 'n3', imagePrompt: 'timeline' },
+        {
+          layout: 'objectives',
+          heading: 'Learning Objectives',
+          bullets: ['a', 'b'],
+          speakerNotes: 'n1',
+        },
+        {
+          layout: 'motivation',
+          heading: 'Hook',
+          bullets: ['hook question'],
+          speakerNotes: 'n2',
+          imagePrompt: 'opening scene',
+        },
+        {
+          layout: 'content',
+          heading: 'C1',
+          bullets: ['x'],
+          speakerNotes: 'n3',
+          imagePrompt: 'timeline',
+        },
         { layout: 'content', heading: 'C2', bullets: ['y'], speakerNotes: 'n4', imagePrompt: null },
-        { layout: 'activity', heading: 'Activity', bullets: ['do thing'], speakerNotes: 'n5', imagePrompt: 'group work scene' },
+        {
+          layout: 'activity',
+          heading: 'Activity',
+          bullets: ['do thing'],
+          speakerNotes: 'n5',
+          imagePrompt: 'group work scene',
+        },
         { layout: 'checkForUnderstanding', heading: 'Check: MCQ prompt', speakerNotes: 'n6' },
         { layout: 'closing', heading: 'Closing', bullets: ['family walk'] },
       ],
@@ -239,8 +262,20 @@ describe('POST /api/slides/generate — LLM + binary response', () => {
 
   it('retries once with appended validation feedback and reports retried=true', async () => {
     mockedChatDetailed
-      .mockResolvedValueOnce({ content: makeInvalidDeckJson(), usage: {}, finishReason: 'stop', provider: 'nim', model: 'm' })
-      .mockResolvedValueOnce({ content: JSON.stringify(VALID_DECK), usage: {}, finishReason: 'stop', provider: 'nim', model: 'm' });
+      .mockResolvedValueOnce({
+        content: makeInvalidDeckJson(),
+        usage: {},
+        finishReason: 'stop',
+        provider: 'nim',
+        model: 'm',
+      })
+      .mockResolvedValueOnce({
+        content: JSON.stringify(VALID_DECK),
+        usage: {},
+        finishReason: 'stop',
+        provider: 'nim',
+        model: 'm',
+      });
     const res = await app().request('/api/slides/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -249,7 +284,10 @@ describe('POST /api/slides/generate — LLM + binary response', () => {
     expect(res.status).toBe(200);
     expect(res.headers.get('x-retried')).toBe('true');
     expect(mockedChatDetailed).toHaveBeenCalledTimes(2);
-    const secondCallMessages = mockedChatDetailed.mock.calls.at(1)?.[0] as Array<{ role: string; content: string }>;
+    const secondCallMessages = mockedChatDetailed.mock.calls.at(1)?.[0] as Array<{
+      role: string;
+      content: string;
+    }>;
     const secondUserMsg = secondCallMessages.find((m) => m.role === 'user')?.content ?? '';
     expect(secondUserMsg).toContain('Previous output failed validation');
     expect(secondUserMsg).toContain('layout');
@@ -257,15 +295,32 @@ describe('POST /api/slides/generate — LLM + binary response', () => {
 
   it('502 with trimmed raw after both attempts fail validation', async () => {
     mockedChatDetailed
-      .mockResolvedValueOnce({ content: makeInvalidDeckJson(), usage: {}, finishReason: 'stop', provider: 'nim', model: 'm' })
-      .mockResolvedValueOnce({ content: `${makeInvalidDeckJson()}${'x'.repeat(9000)}`, usage: {}, finishReason: 'stop', provider: 'nim', model: 'm' });
+      .mockResolvedValueOnce({
+        content: makeInvalidDeckJson(),
+        usage: {},
+        finishReason: 'stop',
+        provider: 'nim',
+        model: 'm',
+      })
+      .mockResolvedValueOnce({
+        content: `${makeInvalidDeckJson()}${'x'.repeat(9000)}`,
+        usage: {},
+        finishReason: 'stop',
+        provider: 'nim',
+        model: 'm',
+      });
     const res = await app().request('/api/slides/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(requestBody({ dryRun: false })),
     });
     expect(res.status).toBe(502);
-    const j = (await res.json()) as { validationErrors?: string; raw?: string; provider?: string; model?: string };
+    const j = (await res.json()) as {
+      validationErrors?: string;
+      raw?: string;
+      provider?: string;
+      model?: string;
+    };
     expect(j.validationErrors).toBeTruthy();
     expect((j.raw ?? '').length).toBeLessThanOrEqual(8192);
     expect(j.provider).toBe('nim');
@@ -273,14 +328,25 @@ describe('POST /api/slides/generate — LLM + binary response', () => {
   });
 
   it('forwards provider/model overrides to chatDetailed', async () => {
-    mockedChatDetailed.mockResolvedValueOnce({ content: JSON.stringify(VALID_DECK), usage: {}, finishReason: 'stop', provider: 'openrouter', model: 'override-model' });
+    mockedChatDetailed.mockResolvedValueOnce({
+      content: JSON.stringify(VALID_DECK),
+      usage: {},
+      finishReason: 'stop',
+      provider: 'openrouter',
+      model: 'override-model',
+    });
     const res = await app().request('/api/slides/generate', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(requestBody({ dryRun: false, provider: 'openrouter', model: 'override-model' })),
+      body: JSON.stringify(
+        requestBody({ dryRun: false, provider: 'openrouter', model: 'override-model' })
+      ),
     });
     expect(res.status).toBe(200);
-    const firstCallOpts = mockedChatDetailed.mock.calls.at(0)?.[1] as { task?: string; model?: string };
+    const firstCallOpts = mockedChatDetailed.mock.calls.at(0)?.[1] as {
+      task?: string;
+      model?: string;
+    };
     expect(firstCallOpts.task).toBe('lesson_plan');
     expect(firstCallOpts.model).toBe('override-model');
   });

@@ -14,7 +14,9 @@ interface PptxSlide {
 interface PptxPresentation {
   layout: string;
   addSlide(): PptxSlide;
-  write(options: { outputType: string }): Promise<Buffer | string | ArrayBuffer | Blob | Uint8Array>;
+  write(options: {
+    outputType: string;
+  }): Promise<Buffer | string | ArrayBuffer | Blob | Uint8Array>;
 }
 const PptxGenJS = PptxGenJSImport as unknown as new () => PptxPresentation;
 
@@ -91,7 +93,7 @@ export async function assemblePptx(deck: SlideDeckSpec, fields: SystemFields): P
             align: 'center',
             fontSize: 16,
             color: COLOR_MUTED,
-          },
+          }
         );
         slide.addText(fields.teacherName ?? TEACHER_FILL_BLANK, {
           x: 1.0,
@@ -187,6 +189,9 @@ export async function assemblePptx(deck: SlideDeckSpec, fields: SystemFields): P
   return out;
 }
 
-export async function assemblePptxToBase64(deck: SlideDeckSpec, fields: SystemFields): Promise<string> {
+export async function assemblePptxToBase64(
+  deck: SlideDeckSpec,
+  fields: SystemFields
+): Promise<string> {
   return (await assemblePptx(deck, fields)).toString('base64');
 }

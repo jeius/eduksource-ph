@@ -8,8 +8,8 @@ import type { ChatDetailedResult, ChatMessage, ChatOptions } from '../lib/ai/cli
 import { chatDetailed } from '../lib/ai/client.js';
 import { primaryContextWindow } from '../lib/ai/providers.js';
 import { extractionCache } from '../lib/cache.js';
-import { assemblePptx } from '../lib/pptx.js';
 import type { SystemFields } from '../lib/pptx.js';
+import { assemblePptx } from '../lib/pptx.js';
 import type { SelectedSession } from '../lib/slides.js';
 import { buildSlidePrompts, SessionNotFoundError, selectSession } from '../lib/slides.js';
 import { buildMaxCompletionTokens, estimateTokens } from '../lib/tokens.js';
@@ -229,7 +229,8 @@ export function createSlidesRoutes() {
             model: modelUsed,
             generatedAt: new Date().toISOString(),
           },
-          bowReference: body.systemFields?.bowReference ?? `DepEd BOW — ${body.termLabel}, ${body.weekLabel}`,
+          bowReference:
+            body.systemFields?.bowReference ?? `DepEd BOW — ${body.termLabel}, ${body.weekLabel}`,
         };
 
         const pptxBuffer = await assemblePptx(deck, systemFields);
@@ -241,12 +242,16 @@ export function createSlidesRoutes() {
         c.header('X-Generated-At', systemFields.generationMetadata.generatedAt);
         // Hono's body Data is Uint8Array<ArrayBuffer>; Node Buffer<ArrayBufferLike> isn't assignable — copy into a plain-backed view.
         return c.body(new Uint8Array(pptxBuffer), 200, {
-          'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'Content-Type':
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         });
       } catch (fatalOrValidation) {
         // retried=true reaching this catch means the second parse threw (first parse already failed).
         const isValidationExhausted = retried;
-        const msg = fatalOrValidation instanceof Error ? fatalOrValidation.message : String(fatalOrValidation);
+        const msg =
+          fatalOrValidation instanceof Error
+            ? fatalOrValidation.message
+            : String(fatalOrValidation);
         if (isValidationExhausted) {
           return c.json(
             {

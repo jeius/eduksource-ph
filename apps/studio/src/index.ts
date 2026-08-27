@@ -6,6 +6,7 @@ import { env } from './config/env.js';
 import { createLogger } from './config/logger.js';
 import type { HonoSchema } from './lib/types.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { createDocxRoutes } from './routes/docx.js';
 import { createExtractRoutes } from './routes/extract.js';
 import { createHealthRoutes } from './routes/health.js';
 import { createLessonPlanRoutes } from './routes/lesson-plan.js';
@@ -28,6 +29,7 @@ app.route('/health', createHealthRoutes());
 app.route('/api', createExtractRoutes());
 app.route('/api/lesson-plans', createLessonPlanRoutes());
 app.route('/api/slides', createSlidesRoutes());
+app.route('/api/docx', createDocxRoutes());
 
 app.get('/', (c) => {
   return c.text('Hello Hono!');

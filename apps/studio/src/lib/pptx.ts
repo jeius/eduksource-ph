@@ -1,5 +1,6 @@
 import type { SlideDeckSpec } from '@eduksource/schemas/slide-deck.js';
 import { TEACHER_FILL_BLANK } from '@eduksource/schemas/studio-constants.js';
+import type { SystemFields } from '@eduksource/schemas/system-fields.js';
 import PptxGenJSImport from 'pptxgenjs';
 
 // Minimal structural types for what this assembler uses from pptxgenjs.
@@ -19,19 +20,6 @@ interface PptxPresentation {
   }): Promise<Buffer | string | ArrayBuffer | Blob | Uint8Array>;
 }
 const PptxGenJS = PptxGenJSImport as unknown as new () => PptxPresentation;
-
-export type SystemFields = {
-  teacherName: string | null;
-  sectionLabel: string | null;
-  gradeLevel: string;
-  learningArea: string;
-  generationMetadata: {
-    provider: string;
-    model: string;
-    generatedAt: string;
-  };
-  bowReference: string;
-};
 
 // Palette (no '#' prefix — pptxgenjs rejects it; assembly spec §5.4)
 const COLOR_TEXT = '1A1A1A';

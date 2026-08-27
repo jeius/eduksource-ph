@@ -47,7 +47,7 @@ Two tracks that mostly run independently until Phase 5, where Studio's output st
 - [✅] In-memory extraction result cache (per-file hash) — avoids re-running the LLM on re-uploads
 - [✅] Lesson plan generation route: prompt design + structured JSON output
 - [✅] PPTX generation: lesson plan JSON → slides via `pptxgenjs` (basic template)
-- [ ] DOCX generation: lesson plan JSON → Word doc via `docx` (npm)
+- [✅] DOCX generation: lesson plan JSON → Word doc via `docx` (npm)
 - [ ] Summative/term test generation route: structured question/answer JSON
 - [ ] Manual end-to-end test: one BOW PDF → all four outputs, reviewed by hand
 - [✅] **New:** build the provider registry (`docs/architecture.md` §3) — even if only NIM is wired up first, structure it as swappable from day one so adding OpenRouter/Opencode later is a config change, not a refactor

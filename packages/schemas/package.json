@@ -17,6 +17,22 @@
     "./lesson-plan.js": {
       "types": "./dist/lesson-plan.d.ts",
       "default": "./dist/lesson-plan.js"
+    },
+    "./slide-deck": {
+      "types": "./dist/slide-deck.d.ts",
+      "default": "./dist/slide-deck.js"
+    },
+    "./slide-deck.js": {
+      "types": "./dist/slide-deck.d.ts",
+      "default": "./dist/slide-deck.js"
+    },
+    "./studio-constants": {
+      "types": "./dist/studio-constants.d.ts",
+      "default": "./dist/studio-constants.js"
+    },
+    "./studio-constants.js": {
+      "types": "./dist/studio-constants.d.ts",
+      "default": "./dist/studio-constants.js"
     }
   },
   "scripts": {

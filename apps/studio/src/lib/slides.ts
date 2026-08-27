@@ -20,19 +20,14 @@ export class SessionNotFoundError extends Error {
   readonly availableSessions: string[];
   constructor(requested: string | null, available: string[]) {
     super(
-      requested === null
-        ? 'No sessions found in lesson plan'
-        : `Session "${requested}" not found`
+      requested === null ? 'No sessions found in lesson plan' : `Session "${requested}" not found`
     );
     this.name = 'SessionNotFoundError';
     this.availableSessions = available;
   }
 }
 
-export function selectSession(
-  lp: LessonPlanResponse,
-  sessionLabel?: string
-): SelectedSession {
+export function selectSession(lp: LessonPlanResponse, sessionLabel?: string): SelectedSession {
   const available = lp.intentions.sessions.map((s: IntentionsSession) => s.sessionLabel);
   const label = sessionLabel ?? available[0];
   if (!label) throw new SessionNotFoundError(null, available);

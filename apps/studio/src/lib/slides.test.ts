@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import type { LessonPlanResponse } from '@eduksource/schemas/lesson-plan.js';
-import { buildSlidePrompts, selectSession, SessionNotFoundError } from './slides.js';
+import { describe, expect, it } from 'vitest';
+import { buildSlidePrompts, SessionNotFoundError, selectSession } from './slides.js';
 
 const lp: LessonPlanResponse = {
   meta: {
@@ -15,14 +15,34 @@ const lp: LessonPlanResponse = {
       learningCompetency: 'Examine developmental stages',
     },
     sessions: [
-      { sessionLabel: 'Session 1', learningObjectives: ['identify stages'], learnerContext: 'visual learners' },
-      { sessionLabel: 'Session 2', learningObjectives: ['map careers'], learnerContext: 'career focus' },
+      {
+        sessionLabel: 'Session 1',
+        learningObjectives: ['identify stages'],
+        learnerContext: 'visual learners',
+      },
+      {
+        sessionLabel: 'Session 2',
+        learningObjectives: ['map careers'],
+        learnerContext: 'career focus',
+      },
     ],
   },
   learningExperience: {
     sessions: [
-      { sessionLabel: 'Session 1', preLesson: 'Greetings & Recall', flow: 'Teacher presents objectives → wellness check → peer sharing.', learningResources: ['Slides'], opportunitiesForIntegration: 'N/A' },
-      { sessionLabel: 'Session 2', preLesson: 'Recall', flow: 'Career mapping workshop.', learningResources: [], opportunitiesForIntegration: 'ICT: tagline' },
+      {
+        sessionLabel: 'Session 1',
+        preLesson: 'Greetings & Recall',
+        flow: 'Teacher presents objectives → wellness check → peer sharing.',
+        learningResources: ['Slides'],
+        opportunitiesForIntegration: 'N/A',
+      },
+      {
+        sessionLabel: 'Session 2',
+        preLesson: 'Recall',
+        flow: 'Career mapping workshop.',
+        learningResources: [],
+        opportunitiesForIntegration: 'ICT: tagline',
+      },
     ],
   },
   assessment: {
@@ -33,8 +53,16 @@ const lp: LessonPlanResponse = {
   },
   waysForward: {
     sessions: [
-      { sessionLabel: 'Session 1', extendedLearningOpportunities: 'Family observation walk.', reflections: null },
-      { sessionLabel: 'Session 2', extendedLearningOpportunities: 'Interview a professional.', reflections: null },
+      {
+        sessionLabel: 'Session 1',
+        extendedLearningOpportunities: 'Family observation walk.',
+        reflections: null,
+      },
+      {
+        sessionLabel: 'Session 2',
+        extendedLearningOpportunities: 'Interview a professional.',
+        reflections: null,
+      },
     ],
   },
 };
@@ -78,7 +106,9 @@ describe('buildSlidePrompts', () => {
 
   it('system prompt encodes slide structure, density and audience rules', () => {
     expect(systemPrompt).toContain('25-30 slides');
-    expect(systemPrompt).toContain('title → objectives → motivation → 3-4 content → activity → checkForUnderstanding → closing');
+    expect(systemPrompt).toContain(
+      'title → objectives → motivation → 3-4 content → activity → checkForUnderstanding → closing'
+    );
     expect(systemPrompt).toContain('no more than 5 bullets');
     expect(systemPrompt).toContain('student-facing');
     expect(systemPrompt).toContain('speakerNotes');
